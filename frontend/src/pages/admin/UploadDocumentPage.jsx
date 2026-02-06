@@ -20,7 +20,7 @@ import { useSnackbar } from "notistack";
 
 export default function UploadDocumentPage() {
   const { enqueueSnackbar } = useSnackbar();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("auth_token");
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
   const [requestId, setRequestId] = useState("");
@@ -40,9 +40,16 @@ export default function UploadDocumentPage() {
         });
 
         const data = await res.json();
-        setRecentUploads(data);
+
+        if (Array.isArray(data)) {
+          setRecentUploads(data);
+        } else {
+          console.error("Expected array for uploads but got:", data);
+          setRecentUploads([]);
+        }
       } catch (error) {
         console.error("Failed to fetch uploads:", error);
+        setRecentUploads([]);
       }
     };
 

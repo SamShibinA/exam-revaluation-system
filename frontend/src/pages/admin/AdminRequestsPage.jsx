@@ -43,7 +43,7 @@ export default function AdminRequestsPage() {
   const [updatedMarks, setUpdatedMarks] = useState('');
   const [adminRemarks, setAdminRemarks] = useState('');
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("auth_token");
 
   const fetchRequests = async (page = 1, status, search) => {
     setIsLoading(true);
@@ -64,10 +64,28 @@ export default function AdminRequestsPage() {
 
       const data = await res.json();
 
-      setRequests(data.data);
-      setPagination({ page: data.page, totalPages: data.totalPages });
+      if (!res.ok) {
+        if (res.status === 401) {
+          // Token expired or invalid
+          console.error("Authentication failed (401)");
+          enqueueSnackbar("Session expired. Please login again.", { variant: "error" });
+          // Optional: Redirect after delay or let user click login
+          // localStorage.removeItem("token"); 
+          // window.location.href = "/login";
+          return;
+        }
+        throw new Error(data.message || "Failed to fetch requests");
+      }
+
+      setRequests(Array.isArray(data.data) ? data.data : []);
+      setPagination({
+        page: data.page || 1,
+        totalPages: data.totalPages || 1
+      });
     } catch (error) {
       console.error("Failed to fetch requests:", error);
+      enqueueSnackbar("Failed to load requests", { variant: "error" });
+      setRequests([]);
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +118,7 @@ export default function AdminRequestsPage() {
           },
           body: JSON.stringify({
             status: newStatus,
-            updatedMarks: updatedMarks ? parseInt(updatedMarks) : undefined,
+            updatedMarks: updatedMarks !== '' ? parseInt(updatedMarks) : undefined,
             adminRemarks: adminRemarks || undefined,
           }),
         }
@@ -314,16 +332,16 @@ export default function AdminRequestsPage() {
 
               {(newStatus === "approved" ||
                 newStatus === "completed") && (
-                <TextField
-                  fullWidth
-                  type="number"
-                  label="Updated Marks (optional)"
-                  value={updatedMarks}
-                  onChange={(e) => setUpdatedMarks(e.target.value)}
-                  inputProps={{ min: 0, max: 100 }}
-                  sx={{ mb: 2 }}
-                />
-              )}
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Updated Marks (optional)"
+                    value={updatedMarks}
+                    onChange={(e) => setUpdatedMarks(e.target.value)}
+                    inputProps={{ min: 0, max: 100 }}
+                    sx={{ mb: 2 }}
+                  />
+                )}
 
               <TextField
                 fullWidth

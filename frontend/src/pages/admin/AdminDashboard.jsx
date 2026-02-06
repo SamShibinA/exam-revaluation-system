@@ -31,28 +31,27 @@ export default function AdminDashboard() {
   const [recentRequests, setRecentRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const token = localStorage.getItem("auth_token");
+
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const headers = {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        };
+
         const [statsRes, requestsRes] = await Promise.all([
-          fetch(`${API_URL}/admin/stats`, {
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-          }),
-          fetch(`${API_URL}/requests?limit=5`, {
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-          }),
+          fetch(`${API_URL}/admin/stats`, { headers }),
+          fetch(`${API_URL}/requests?limit=5`, { headers }),
         ]);
 
-        const statsData = await statsRes.json();
-        const requestsData = await requestsRes.json();
+        const statsData = statsRes.ok ? await statsRes.json() : null;
+        const requestsData = requestsRes.ok ? await requestsRes.json() : null;
 
-        if (!statsRes.ok) throw new Error(statsData.message || "Failed to load stats");
-        if (!requestsRes.ok) throw new Error(requestsData.message || "Failed to load requests");
+        if (statsData) setStats(statsData);
+        if (requestsData) setRecentRequests(requestsData.data || []);
 
-        setStats(statsData);
-        setRecentRequests(requestsData.data || []);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
       } finally {
@@ -61,7 +60,7 @@ export default function AdminDashboard() {
     };
 
     fetchData();
-  }, []);
+  }, [token]);
 
   if (isLoading) {
     return <PageLoader />;

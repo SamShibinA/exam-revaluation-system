@@ -1,6 +1,41 @@
 import AdminSetting from "../models/AdminSetting.js";
 import Admin from "../models/Admin.js";
+import Student from "../models/Student.js";
+import Request from "../models/Request.js";
 import bcrypt from "bcryptjs";
+
+// GET DASHBOARD STATS
+export const getDashboardStats = async (req, res) => {
+  try {
+    const totalStudents = await Student.countDocuments();
+    const totalRequests = await Request.countDocuments();
+    const pendingRequests = await Request.countDocuments({ status: "pending" });
+    const approvedRequests = await Request.countDocuments({ status: "approved" });
+    const rejectedRequests = await Request.countDocuments({ status: "rejected" });
+    const inReviewRequests = await Request.countDocuments({ status: "in_review" });
+
+    // Calculate completed today
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const completedToday = await Request.countDocuments({
+      status: { $in: ["approved", "rejected", "completed"] },
+      updatedAt: { $gte: startOfDay },
+    });
+
+    res.json({
+      totalStudents,
+      totalRequests,
+      pendingRequests,
+      approvedRequests,
+      rejectedRequests,
+      inReviewRequests,
+      completedToday,
+      avgProcessingTime: "2.5 days", // Placeholder for now
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // GET ADMIN SETTINGS
 export const getAdminSettings = async (req, res) => {

@@ -18,7 +18,7 @@ import {
 } from "@mui/icons-material";
 
 export default function AdminSettingsPage() {
-  const token = localStorage.getItem("token"); // or wherever you store JWT
+  const token = localStorage.getItem("auth_token"); // or wherever you store JWT
 
   const [profile, setProfile] = useState({
     fullName: "",

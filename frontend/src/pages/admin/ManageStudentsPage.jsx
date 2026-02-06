@@ -13,7 +13,7 @@ import {
 import { Search as SearchIcon } from "@mui/icons-material";
 
 export default function ManageStudentsPage() {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("auth_token");
   const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
   const [students, setStudents] = useState([]);
@@ -30,9 +30,15 @@ export default function ManageStudentsPage() {
         });
 
         const data = await res.json();
-        setStudents(data);
+        if (Array.isArray(data)) {
+          setStudents(data);
+        } else {
+          console.error("API returned non-array for students:", data);
+          setStudents([]);
+        }
       } catch (error) {
         console.error("Failed to fetch students:", error);
+        setStudents([]);
       }
     };
 
@@ -139,7 +145,7 @@ export default function ManageStudentsPage() {
                     Semester
                   </Typography>
                   <Typography variant="body2">
-                    {student.semester}
+                    {student.currentSemester}
                   </Typography>
                 </Box>
               </CardContent>

@@ -72,6 +72,19 @@ export const getAllRequests = async (req, res) => {
       filter.status = status;
     }
 
+    if (search) {
+      const students = await Student.find({
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+          { studentId: { $regex: search, $options: "i" } },
+        ]
+      }).select("_id");
+
+      const studentIds = students.map(s => s._id);
+      filter.studentId = { $in: studentIds };
+    }
+
     let query = Request.find(filter)
       .populate("subjectId", "code name semester credits")
       .populate("studentId", "name email")
@@ -85,11 +98,11 @@ export const getAllRequests = async (req, res) => {
 
     const formatted = requests.map((r) => ({
       id: r._id,
-      studentId: r.studentId._id,
-      studentName: r.studentId.name,
-      studentEmail: r.studentId.email,
-      subjectId: r.subjectId._id,
-      subject: r.subjectId,
+      studentId: r.studentId?._id || "N/A",
+      studentName: r.studentId?.name || "Unknown Student",
+      studentEmail: r.studentId?.email || "N/A",
+      subjectId: r.subjectId?._id || "N/A",
+      subject: r.subjectId || { code: "N/A", name: "Unknown Subject" },
       requestType: r.requestType,
       reason: r.reason,
       currentMarks: r.currentMarks,
