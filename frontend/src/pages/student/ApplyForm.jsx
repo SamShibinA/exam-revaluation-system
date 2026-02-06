@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { marksService } from '../../services/marksService';
-import { requestService } from '../../services/requestService';
 import { PageLoader } from '../../components/mui/PageLoader';
+
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+
 import {
   Box,
   Card,
@@ -56,10 +57,23 @@ export default function ApplyForm({ type }) {
     ? 'Request to view your answer sheet for a particular subject'
     : 'Request re-evaluation of your answer sheet by an expert';
 
+  // ✅ Fetch marks directly from backend (NO services)
   useEffect(() => {
     const fetchMarks = async () => {
       try {
-        const data = await marksService.getMarks();
+        const res = await fetch(`${API_URL}/marks`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to fetch marks');
+        }
+
         setMarks(data);
       } catch (error) {
         console.error('Failed to fetch marks:', error);
@@ -71,14 +85,28 @@ export default function ApplyForm({ type }) {
     fetchMarks();
   }, []);
 
+  // ✅ Submit request directly to backend (NO services)
   const onSubmit = async (values) => {
     setIsSubmitting(true);
     try {
-      await requestService.createRequest({
-        subjectId: values.subjectId,
-        requestType: type,
-        reason: values.reason,
+      const res = await fetch(`${API_URL}/requests`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subjectId: values.subjectId,
+          requestType: type,
+          reason: values.reason,
+        }),
       });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to submit request');
+      }
 
       enqueueSnackbar(`Your ${type} request has been submitted successfully.`, {
         variant: 'success',
@@ -86,13 +114,17 @@ export default function ApplyForm({ type }) {
 
       navigate('/student/requests');
     } catch (error) {
-      enqueueSnackbar(error?.message || 'Failed to submit request', { variant: 'error' });
+      enqueueSnackbar(error?.message || 'Failed to submit request', {
+        variant: 'error',
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const selectedSubject = marks.find((m) => m.subjectId === watch('subjectId'));
+  const selectedSubject = marks.find(
+    (m) => m.subjectId === watch('subjectId')
+  );
   const reasonValue = watch('reason') || '';
 
   if (isLoading) {
@@ -102,7 +134,11 @@ export default function ApplyForm({ type }) {
   return (
     <Box sx={{ maxWidth: 700, mx: 'auto', width: '100%', px: { xs: 0, sm: 1 } }}>
       <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-        <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' } }}
+        >
           {title}
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -221,7 +257,8 @@ export default function ApplyForm({ type }) {
                   placeholder={`Explain why you're applying for ${type}...`}
                   error={!!errors.reason}
                   helperText={
-                    errors.reason?.message || `${reasonValue.length}/500 characters`
+                    errors.reason?.message ||
+                    `${reasonValue.length}/500 characters`
                   }
                   sx={{ mb: 3 }}
                 />

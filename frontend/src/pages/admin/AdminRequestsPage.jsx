@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { requestService } from '../../services/requestService';
 import { DataTable } from '../../components/mui/DataTable';
 import { StatusBadge } from '../../components/mui/StatusBadge';
 import {
@@ -25,6 +24,8 @@ import {
 import { useSnackbar } from 'notistack';
 import { format } from 'date-fns';
 
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+
 export default function AdminRequestsPage() {
   const { enqueueSnackbar } = useSnackbar();
   const [requests, setRequests] = useState([]);
@@ -38,24 +39,35 @@ export default function AdminRequestsPage() {
     totalPages: 1,
   });
 
-  // Form state for updating request
   const [newStatus, setNewStatus] = useState('pending');
   const [updatedMarks, setUpdatedMarks] = useState('');
   const [adminRemarks, setAdminRemarks] = useState('');
 
+  const token = localStorage.getItem("token");
+
   const fetchRequests = async (page = 1, status, search) => {
     setIsLoading(true);
     try {
-      const data = await requestService.getAllRequests({
+      const params = new URLSearchParams({
         page,
         limit: 10,
-        status: status !== 'all' ? status : undefined,
-        search,
       });
+
+      if (status && status !== "all") params.append("status", status);
+      if (search) params.append("search", search);
+
+      const res = await fetch(`${API_URL}/requests?${params.toString()}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
       setRequests(data.data);
       setPagination({ page: data.page, totalPages: data.totalPages });
     } catch (error) {
-      console.error('Failed to fetch requests:', error);
+      console.error("Failed to fetch requests:", error);
     } finally {
       setIsLoading(false);
     }
@@ -78,22 +90,36 @@ export default function AdminRequestsPage() {
 
     setIsProcessing(true);
     try {
-      await requestService.updateRequestStatus(selectedRequest.id, {
-        status: newStatus,
-        updatedMarks: updatedMarks ? parseInt(updatedMarks) : undefined,
-        adminRemarks: adminRemarks || undefined,
-      });
+      const res = await fetch(
+        `${API_URL}/requests/${selectedRequest.id}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            status: newStatus,
+            updatedMarks: updatedMarks ? parseInt(updatedMarks) : undefined,
+            adminRemarks: adminRemarks || undefined,
+          }),
+        }
+      );
+
+      const result = await res.json();
+
+      if (!res.ok) throw new Error(result.message || "Update failed");
 
       enqueueSnackbar(
-        `Request ${selectedRequest.id} has been updated successfully.`,
-        { variant: 'success' }
+        `Request ${selectedRequest.id} updated successfully.`,
+        { variant: "success" }
       );
 
       setIsDialogOpen(false);
       fetchRequests(pagination.page, filterStatus);
     } catch (error) {
-      enqueueSnackbar(error?.message || 'Failed to update request', {
-        variant: 'error',
+      enqueueSnackbar(error.message || "Failed to update request", {
+        variant: "error",
       });
     } finally {
       setIsProcessing(false);
@@ -102,8 +128,8 @@ export default function AdminRequestsPage() {
 
   const columns = [
     {
-      key: 'id',
-      header: 'Request ID',
+      key: "id",
+      header: "Request ID",
       render: (request) => (
         <Typography variant="body2" fontFamily="monospace">
           {request.id}
@@ -111,8 +137,8 @@ export default function AdminRequestsPage() {
       ),
     },
     {
-      key: 'studentName',
-      header: 'Student',
+      key: "studentName",
+      header: "Student",
       render: (request) => (
         <Box>
           <Typography variant="body2" fontWeight={500}>
@@ -125,8 +151,8 @@ export default function AdminRequestsPage() {
       ),
     },
     {
-      key: 'subject',
-      header: 'Subject',
+      key: "subject",
+      header: "Subject",
       render: (request) => (
         <Box>
           <Typography variant="body2" fontWeight={500}>
@@ -139,20 +165,20 @@ export default function AdminRequestsPage() {
       ),
     },
     {
-      key: 'requestType',
-      header: 'Type',
+      key: "requestType",
+      header: "Type",
       render: (request) => (
         <Chip
           label={request.requestType}
           size="small"
           variant="outlined"
-          sx={{ textTransform: 'capitalize' }}
+          sx={{ textTransform: "capitalize" }}
         />
       ),
     },
     {
-      key: 'currentMarks',
-      header: 'Marks',
+      key: "currentMarks",
+      header: "Marks",
       render: (request) => (
         <Box>
           <Typography variant="body2">{request.currentMarks}</Typography>
@@ -165,35 +191,35 @@ export default function AdminRequestsPage() {
       ),
     },
     {
-      key: 'status',
-      header: 'Status',
+      key: "status",
+      header: "Status",
       render: (request) => <StatusBadge status={request.status} />,
     },
     {
-      key: 'createdAt',
-      header: 'Date',
+      key: "createdAt",
+      header: "Date",
       render: (request) => (
         <Typography variant="body2" color="text.secondary">
-          {format(new Date(request.createdAt), 'MMM dd, yyyy')}
+          {format(new Date(request.createdAt), "MMM dd, yyyy")}
         </Typography>
       ),
     },
     {
-      key: 'actions',
-      header: 'Actions',
+      key: "actions",
+      header: "Actions",
       render: (request) => (
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
+        <Box sx={{ display: "flex", gap: 0.5 }}>
           <IconButton size="small" onClick={() => handleViewRequest(request)}>
             <EyeIcon fontSize="small" />
           </IconButton>
-          {request.status === 'pending' && (
+          {request.status === "pending" && (
             <>
               <IconButton
                 size="small"
                 color="success"
                 onClick={() => {
                   setSelectedRequest(request);
-                  setNewStatus('approved');
+                  setNewStatus("approved");
                   setIsDialogOpen(true);
                 }}
               >
@@ -204,7 +230,7 @@ export default function AdminRequestsPage() {
                 color="error"
                 onClick={() => {
                   setSelectedRequest(request);
-                  setNewStatus('rejected');
+                  setNewStatus("rejected");
                   setIsDialogOpen(true);
                 }}
               >
@@ -218,9 +244,13 @@ export default function AdminRequestsPage() {
   ];
 
   return (
-    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
       <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-        <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" } }}
+        >
           All Requests
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -267,67 +297,6 @@ export default function AdminRequestsPage() {
         <DialogContent>
           {selectedRequest && (
             <Box sx={{ pt: 1 }}>
-              <Box
-                sx={{
-                  p: 2,
-                  border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 2,
-                  mb: 3,
-                }}
-              >
-                <Grid container spacing={2}>
-                  <Grid item xs={6}>
-                    <Typography variant="caption" color="text.secondary">
-                      Student
-                    </Typography>
-                    <Typography variant="body2" fontWeight={500}>
-                      {selectedRequest.studentName}
-                    </Typography>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Typography variant="caption" color="text.secondary">
-                      Subject
-                    </Typography>
-                    <Typography variant="body2" fontWeight={500}>
-                      {selectedRequest.subject.code} -{' '}
-                      {selectedRequest.subject.name}
-                    </Typography>
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Typography variant="caption" color="text.secondary">
-                      Type
-                    </Typography>
-                    <Chip
-                      label={selectedRequest.requestType}
-                      size="small"
-                      variant="outlined"
-                      sx={{ textTransform: 'capitalize' }}
-                    />
-                  </Grid>
-
-                  <Grid item xs={6}>
-                    <Typography variant="caption" color="text.secondary">
-                      Current Marks
-                    </Typography>
-                    <Typography variant="body2" fontWeight={500}>
-                      {selectedRequest.currentMarks}/100
-                    </Typography>
-                  </Grid>
-                </Grid>
-
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Reason
-                  </Typography>
-                  <Typography variant="body2">
-                    {selectedRequest.reason}
-                  </Typography>
-                </Box>
-              </Box>
-
               <TextField
                 select
                 fullWidth
@@ -343,12 +312,12 @@ export default function AdminRequestsPage() {
                 <MenuItem value="completed">Completed</MenuItem>
               </TextField>
 
-              {(newStatus === 'approved' || newStatus === 'completed') && (
+              {(newStatus === "approved" ||
+                newStatus === "completed") && (
                 <TextField
                   fullWidth
                   type="number"
                   label="Updated Marks (optional)"
-                  placeholder="Enter new marks"
                   value={updatedMarks}
                   onChange={(e) => setUpdatedMarks(e.target.value)}
                   inputProps={{ min: 0, max: 100 }}
@@ -361,7 +330,6 @@ export default function AdminRequestsPage() {
                 multiline
                 rows={3}
                 label="Admin Remarks"
-                placeholder="Add remarks for the student..."
                 value={adminRemarks}
                 onChange={(e) => setAdminRemarks(e.target.value)}
               />
@@ -380,9 +348,11 @@ export default function AdminRequestsPage() {
             onClick={handleUpdateRequest}
             variant="contained"
             disabled={isProcessing}
-            startIcon={isProcessing && <CircularProgress size={16} />}
+            startIcon={
+              isProcessing && <CircularProgress size={16} />
+            }
           >
-            {isProcessing ? 'Updating...' : 'Update Request'}
+            {isProcessing ? "Updating..." : "Update Request"}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-import { marksService } from '../../services/marksService';
 import { PageLoader } from '../../components/mui/PageLoader';
+
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+
 import {
   Box,
   Card,
@@ -42,7 +44,19 @@ export default function ViewMarksPage() {
   useEffect(() => {
     const fetchMarks = async () => {
       try {
-        const data = await marksService.getMarks();
+        const res = await fetch(`${API_URL}/marks`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to fetch marks');
+        }
+
         setMarks(data);
       } catch (error) {
         console.error('Failed to fetch marks:', error);
@@ -58,9 +72,9 @@ export default function ViewMarksPage() {
     return <PageLoader />;
   }
 
-  const totalCredits = marks.reduce((sum, m) => sum + m.subject.credits, 0);
+  const totalCredits = marks.reduce((sum, m) => sum + (m.subject?.credits || 0), 0);
   const weightedSum = marks.reduce(
-    (sum, m) => sum + m.totalMarks * m.subject.credits,
+    (sum, m) => sum + m.totalMarks * (m.subject?.credits || 0),
     0
   );
   const sgpa =
@@ -69,7 +83,11 @@ export default function ViewMarksPage() {
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
       <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-        <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' } }}
+        >
           View Marks
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -79,7 +97,7 @@ export default function ViewMarksPage() {
 
       {/* Summary Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
@@ -92,7 +110,7 @@ export default function ViewMarksPage() {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
@@ -105,7 +123,7 @@ export default function ViewMarksPage() {
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid item xs={12} sm={4}>
           <Card>
             <CardContent sx={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">
@@ -142,15 +160,15 @@ export default function ViewMarksPage() {
 
               <TableBody>
                 {marks.map((mark) => (
-                  <TableRow key={mark.id} hover>
+                  <TableRow key={mark.id || mark._id} hover>
                     <TableCell>
                       <Typography fontWeight={500}>
-                        {mark.subject.code}
+                        {mark.subject?.code}
                       </Typography>
                     </TableCell>
-                    <TableCell>{mark.subject.name}</TableCell>
+                    <TableCell>{mark.subject?.name}</TableCell>
                     <TableCell align="center">
-                      {mark.subject.credits}
+                      {mark.subject?.credits}
                     </TableCell>
                     <TableCell align="center">
                       {mark.internalMarks}

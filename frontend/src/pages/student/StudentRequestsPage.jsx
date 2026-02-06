@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { requestService } from '../../services/requestService';
 import { PageLoader } from '../../components/mui/PageLoader';
 import { StatusBadge } from '../../components/mui/StatusBadge';
 import { RequestTimeline } from '../../components/mui/RequestTimeline';
+
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+
 import {
   Box,
   Card,
@@ -31,7 +33,19 @@ export default function StudentRequestsPage() {
   useEffect(() => {
     const fetchRequests = async () => {
       try {
-        const data = await requestService.getMyRequests();
+        const res = await fetch(`${API_URL}/requests/me`, {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || 'Failed to fetch requests');
+        }
+
         setRequests(data);
       } catch (error) {
         console.error('Failed to fetch requests:', error);
@@ -101,7 +115,7 @@ export default function StudentRequestsPage() {
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {requests.map((request) => (
-            <Card key={request.id}>
+            <Card key={request.id || request._id}>
               <CardHeader
                 title={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -116,7 +130,7 @@ export default function StudentRequestsPage() {
                     />
                   </Box>
                 }
-                subheader={`Request ID: ${request.id} • Submitted on ${format(
+                subheader={`Request ID: ${request.id || request._id} • Submitted on ${format(
                   new Date(request.createdAt),
                   'MMM dd, yyyy'
                 )}`}
@@ -145,7 +159,9 @@ export default function StudentRequestsPage() {
                         <Typography variant="caption" color="text.secondary">
                           Current Marks
                         </Typography>
-                        <Typography variant="h6">{request.currentMarks}/100</Typography>
+                        <Typography variant="h6">
+                          {request.currentMarks}/100
+                        </Typography>
                       </Box>
 
                       {request.updatedMarks !== undefined && (
@@ -156,7 +172,11 @@ export default function StudentRequestsPage() {
                           <Typography variant="h6" color="success.main">
                             {request.updatedMarks}/100
                             {request.updatedMarks > request.currentMarks && (
-                              <Typography component="span" variant="body2" sx={{ ml: 1 }}>
+                              <Typography
+                                component="span"
+                                variant="body2"
+                                sx={{ ml: 1 }}
+                              >
                                 (+{request.updatedMarks - request.currentMarks})
                               </Typography>
                             )}

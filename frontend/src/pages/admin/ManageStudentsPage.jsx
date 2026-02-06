@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   Box,
   Card,
@@ -8,21 +9,51 @@ import {
   InputAdornment,
   Avatar,
   Grid,
-} from '@mui/material';
-import { Search as SearchIcon } from '@mui/icons-material';
+} from "@mui/material";
+import { Search as SearchIcon } from "@mui/icons-material";
 
 export default function ManageStudentsPage() {
-  const students = [
-    { id: 'STU2024001', name: 'John Doe', email: 'john@university.edu', department: 'Computer Science', semester: 3 },
-    { id: 'STU2024002', name: 'Alice Smith', email: 'alice@university.edu', department: 'Computer Science', semester: 3 },
-    { id: 'STU2024003', name: 'Bob Wilson', email: 'bob@university.edu', department: 'Information Technology', semester: 5 },
-    { id: 'STU2024004', name: 'Carol Johnson', email: 'carol@university.edu', department: 'Computer Science', semester: 3 },
-  ];
+  const token = localStorage.getItem("token");
+  const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
+  const [students, setStudents] = useState([]);
+  const [search, setSearch] = useState("");
+
+  // Fetch students from backend
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/students`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const data = await res.json();
+        setStudents(data);
+      } catch (error) {
+        console.error("Failed to fetch students:", error);
+      }
+    };
+
+    fetchStudents();
+  }, []);
+
+  // Filter students based on search
+  const filteredStudents = students.filter(
+    (student) =>
+      student.name.toLowerCase().includes(search.toLowerCase()) ||
+      student.studentId.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
-    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+    <Box sx={{ width: "100%", overflow: "hidden" }}>
       <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-        <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
+        <Typography
+          variant="h5"
+          fontWeight={700}
+          sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" } }}
+        >
           Manage Students
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -36,6 +67,8 @@ export default function ManageStudentsPage() {
         size="small"
         fullWidth
         sx={{ mb: { xs: 2, sm: 3 }, maxWidth: { sm: 400 } }}
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -47,26 +80,32 @@ export default function ManageStudentsPage() {
 
       {/* Students Grid */}
       <Grid container spacing={2}>
-        {students.map((student) => (
-          <Grid item xs={12} sm={6} lg={4} key={student.id}>
+        {filteredStudents.map((student) => (
+          <Grid item xs={12} sm={6} lg={4} key={student._id}>
             <Card
               sx={{
-                transition: 'box-shadow 0.2s',
-                '&:hover': { boxShadow: 4 },
+                transition: "box-shadow 0.2s",
+                "&:hover": { boxShadow: 4 },
               }}
             >
               <CardHeader
                 avatar={
-                  <Avatar sx={{ bgcolor: 'primary.100', color: 'primary.main' }}>
+                  <Avatar sx={{ bgcolor: "primary.100", color: "primary.main" }}>
                     {student.name.charAt(0)}
                   </Avatar>
                 }
                 title={student.name}
-                subheader={student.id}
+                subheader={student.studentId}
                 titleTypographyProps={{ fontWeight: 500 }}
               />
               <CardContent sx={{ pt: 0 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 1,
+                  }}
+                >
                   <Typography variant="body2" color="text.secondary">
                     Email
                   </Typography>
@@ -75,18 +114,33 @@ export default function ManageStudentsPage() {
                   </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    mb: 1,
+                  }}
+                >
                   <Typography variant="body2" color="text.secondary">
                     Department
                   </Typography>
-                  <Typography variant="body2">{student.department}</Typography>
+                  <Typography variant="body2">
+                    {student.department}
+                  </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                  }}
+                >
                   <Typography variant="body2" color="text.secondary">
                     Semester
                   </Typography>
-                  <Typography variant="body2">{student.semester}</Typography>
+                  <Typography variant="body2">
+                    {student.semester}
+                  </Typography>
                 </Box>
               </CardContent>
             </Card>

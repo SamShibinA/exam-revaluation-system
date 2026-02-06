@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { StatsCard } from '../../components/mui/StatsCard';
 import { StatusBadge } from '../../components/mui/StatusBadge';
 import { PageLoader } from '../../components/mui/PageLoader';
-import { adminService } from '../../services/adminService';
-import { requestService } from '../../services/requestService';
 import { Link } from 'react-router-dom';
 import {
   Box,
@@ -26,6 +24,8 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 
+const API_URL = import.meta.env.VITE_BACKEND_URL;
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [recentRequests, setRecentRequests] = useState([]);
@@ -34,12 +34,25 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsData, requestsData] = await Promise.all([
-          adminService.getDashboardStats(),
-          requestService.getAllRequests({ limit: 5 }),
+        const [statsRes, requestsRes] = await Promise.all([
+          fetch(`${API_URL}/admin/stats`, {
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+          }),
+          fetch(`${API_URL}/requests?limit=5`, {
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+          }),
         ]);
+
+        const statsData = await statsRes.json();
+        const requestsData = await requestsRes.json();
+
+        if (!statsRes.ok) throw new Error(statsData.message || "Failed to load stats");
+        if (!requestsRes.ok) throw new Error(requestsData.message || "Failed to load requests");
+
         setStats(statsData);
-        setRecentRequests(requestsData.data);
+        setRecentRequests(requestsData.data || []);
       } catch (error) {
         console.error('Failed to fetch dashboard data:', error);
       } finally {

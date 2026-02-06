@@ -4,8 +4,7 @@ import React, {
   useReducer,
   useCallback,
   useEffect,
-} from 'react';
-import { authService } from '../services/authService';
+} from "react";
 
 const initialState = {
   user: null,
@@ -16,10 +15,10 @@ const initialState = {
 
 function authReducer(state, action) {
   switch (action.type) {
-    case 'AUTH_START':
+    case "AUTH_START":
       return { ...state, isLoading: true };
 
-    case 'AUTH_SUCCESS':
+    case "AUTH_SUCCESS":
       return {
         ...state,
         user: action.payload.user,
@@ -28,7 +27,7 @@ function authReducer(state, action) {
         isLoading: false,
       };
 
-    case 'AUTH_FAILURE':
+    case "AUTH_FAILURE":
       return {
         ...state,
         user: null,
@@ -37,7 +36,7 @@ function authReducer(state, action) {
         isLoading: false,
       };
 
-    case 'LOGOUT':
+    case "LOGOUT":
       return {
         ...state,
         user: null,
@@ -46,7 +45,7 @@ function authReducer(state, action) {
         isLoading: false,
       };
 
-    case 'SET_LOADING':
+    case "SET_LOADING":
       return { ...state, isLoading: action.payload };
 
     default:
@@ -59,54 +58,69 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // Check for existing token on mount
+  // Check existing login on refresh
   useEffect(() => {
-    const initAuth = async () => {
-      const token = localStorage.getItem('auth_token');
-      const userStr = localStorage.getItem('auth_user');
+    const token = localStorage.getItem("auth_token");
+    const userStr = localStorage.getItem("auth_user");
 
-      if (token && userStr) {
-        try {
-          const user = JSON.parse(userStr);
-          dispatch({ type: 'AUTH_SUCCESS', payload: { user, token } });
-        } catch {
-          localStorage.removeItem('auth_token');
-          localStorage.removeItem('auth_user');
-          dispatch({ type: 'AUTH_FAILURE' });
-        }
-      } else {
-        dispatch({ type: 'SET_LOADING', payload: false });
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        dispatch({ type: "AUTH_SUCCESS", payload: { user, token } });
+      } catch {
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_user");
+        dispatch({ type: "AUTH_FAILURE" });
       }
-    };
-
-    initAuth();
+    } else {
+      dispatch({ type: "SET_LOADING", payload: false });
+    }
   }, []);
 
+  // ✅ LOGIN (DIRECT CALL TO BACKEND — NO SERVICES, NO API CLIENT)
   const login = useCallback(async (credentials) => {
-    dispatch({ type: 'AUTH_START' });
+    dispatch({ type: "AUTH_START" });
+
     try {
-      const response = await authService.login(credentials);
-      localStorage.setItem('auth_token', response.token);
-      localStorage.setItem('auth_user', JSON.stringify(response.user));
-      dispatch({ type: 'AUTH_SUCCESS', payload: response });
+      const response = await fetch(
+        "http://localhost:5000/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(credentials),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      localStorage.setItem("auth_token", data.token);
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
+
+      dispatch({ type: "AUTH_SUCCESS", payload: data });
     } catch (error) {
-      dispatch({ type: 'AUTH_FAILURE' });
+      dispatch({ type: "AUTH_FAILURE" });
       throw error;
     }
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('auth_user');
-    dispatch({ type: 'LOGOUT' });
+    localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_user");
+    dispatch({ type: "LOGOUT" });
   }, []);
 
   const value = {
     ...state,
     login,
     logout,
-    isStudent: state.user?.role === 'student',
-    isAdmin: state.user?.role === 'admin',
+    isStudent: state.user?.role === "student",
+    isAdmin: state.user?.role === "admin",
   };
 
   return (
@@ -119,7 +133,7 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === null) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

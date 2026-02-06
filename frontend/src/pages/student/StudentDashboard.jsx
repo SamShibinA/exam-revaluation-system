@@ -4,8 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import { StatsCard } from '../../components/mui/StatsCard';
 import { StatusBadge } from '../../components/mui/StatusBadge';
 import { PageLoader } from '../../components/mui/PageLoader';
-import { marksService } from '../../services/marksService';
-import { requestService } from '../../services/requestService';
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 import {
   Box,
   Card,
@@ -15,6 +15,7 @@ import {
   Button,
   Grid,
 } from '@mui/material';
+
 import {
   MenuBook as BookIcon,
   Description as FileIcon,
@@ -33,24 +34,47 @@ export default function StudentDashboard() {
   const [recentRequests, setRecentRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [statsData, requestsData] = await Promise.all([
-          marksService.getStudentStats(),
-          requestService.getMyRequests(),
-        ]);
-        setStats(statsData);
-        setRecentRequests(requestsData.slice(0, 3));
-      } catch (error) {
-        console.error('Failed to fetch dashboard data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const studentId = user.id;
+      const token = localStorage.getItem("auth_token");
 
-    fetchData();
-  }, []);
+      const statsRes = await fetch(
+        `${BASE_URL}/student/stats/${studentId}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const requestsRes = await fetch(
+        `${BASE_URL}/requests/my/${studentId}`,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const statsData = await statsRes.json();
+      const requestsData = await requestsRes.json();
+
+      setStats(statsData);
+      setRecentRequests(requestsData.slice(0, 3));
+    } catch (error) {
+      console.error("Failed to fetch dashboard data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (user) fetchData();
+}, [user]);
+
 
   if (isLoading) {
     return <PageLoader />;

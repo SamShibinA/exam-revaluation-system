@@ -1,0 +1,141 @@
+import Request from "../models/Request.js";
+import Student from "../models/Student.js";
+import Subject from "../models/Subject.js";
+
+// ✅ Get requests of a particular student
+export const getMyRequests = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const requests = await Request.find({ studentId })
+      .populate("subjectId", "code name semester credits")
+      .sort({ createdAt: -1 });
+
+    const formattedRequests = requests.map((r) => ({
+      id: r._id,
+      studentId: r.studentId,
+      subjectId: r.subjectId._id,
+      subject: r.subjectId,
+      requestType: r.requestType,
+      reason: r.reason,
+      currentMarks: r.currentMarks,
+      status: r.status,
+      updatedMarks: r.updatedMarks,
+      adminRemarks: r.adminRemarks,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+    }));
+
+    res.json(formattedRequests);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ Create new request
+export const createRequest = async (req, res) => {
+  try {
+    const { studentId, subjectId, requestType, reason, currentMarks } = req.body;
+
+    const newRequest = new Request({
+      studentId,
+      subjectId,
+      requestType,
+      reason,
+      currentMarks,
+      status: "pending",
+      createdAt: new Date(),
+    });
+
+    await newRequest.save();
+
+    const populatedRequest = await Request.findById(newRequest._id)
+      .populate("subjectId", "code name semester credits");
+
+    res.status(201).json(populatedRequest);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ Get all requests (Admin)
+export const getAllRequests = async (req, res) => {
+  try {
+    let { page = 1, limit = 10, status, search } = req.query;
+
+    page = Number(page);
+    limit = Number(limit);
+
+    let filter = {};
+
+    if (status) {
+      filter.status = status;
+    }
+
+    let query = Request.find(filter)
+      .populate("subjectId", "code name semester credits")
+      .populate("studentId", "name email")
+      .sort({ createdAt: -1 });
+
+    const total = await Request.countDocuments(filter);
+
+    const requests = await query
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const formatted = requests.map((r) => ({
+      id: r._id,
+      studentId: r.studentId._id,
+      studentName: r.studentId.name,
+      studentEmail: r.studentId.email,
+      subjectId: r.subjectId._id,
+      subject: r.subjectId,
+      requestType: r.requestType,
+      reason: r.reason,
+      currentMarks: r.currentMarks,
+      updatedMarks: r.updatedMarks,
+      adminRemarks: r.adminRemarks,
+      status: r.status,
+      createdAt: r.createdAt,
+      updatedAt: r.updatedAt,
+    }));
+
+    res.json({
+      data: formatted,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ Update request status (Admin)
+export const updateRequestStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, updatedMarks, adminRemarks } = req.body;
+
+    const request = await Request.findById(id);
+    if (!request) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    request.status = status || request.status;
+    request.updatedMarks = updatedMarks ?? request.updatedMarks;
+    request.adminRemarks = adminRemarks ?? request.adminRemarks;
+    request.updatedAt = new Date();
+
+    await request.save();
+
+    const updatedRequest = await Request.findById(id)
+      .populate("subjectId", "code name semester credits")
+      .populate("studentId", "name email");
+
+    res.json(updatedRequest);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
