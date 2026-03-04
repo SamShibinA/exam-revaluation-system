@@ -3,9 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useAuth } from '../../context/AuthContext';
 import { PageLoader } from '../../components/mui/PageLoader';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
+
+function getSubjectId(mark) {
+  if (mark.subjectId && typeof mark.subjectId === 'object' && mark.subjectId._id) {
+    return String(mark.subjectId._id);
+  }
+  return mark.subjectId ? String(mark.subjectId) : '';
+}
 
 import {
   Box,
@@ -33,6 +41,7 @@ const formSchema = z.object({
 
 export default function ApplyForm({ type }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const [marks, setMarks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,14 +66,19 @@ export default function ApplyForm({ type }) {
     ? 'Request to view your answer sheet for a particular subject'
     : 'Request re-evaluation of your answer sheet by an expert';
 
-  // ✅ Fetch marks directly from backend (NO services)
   useEffect(() => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
+
     const fetchMarks = async () => {
       try {
-        const res = await fetch(`${API_URL}/marks`, {
-          credentials: 'include',
+        const token = localStorage.getItem('auth_token');
+        const res = await fetch(`${API_URL}/marks/${user.id}`, {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` }),
           },
         });
 
@@ -74,31 +88,39 @@ export default function ApplyForm({ type }) {
           throw new Error(data.message || 'Failed to fetch marks');
         }
 
-        setMarks(data);
+        setMarks(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch marks:', error);
+        setMarks([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchMarks();
-  }, []);
+  }, [user?.id]);
 
-  // ✅ Submit request directly to backend (NO services)
   const onSubmit = async (values) => {
+    if (!user?.id) {
+      enqueueSnackbar('You must be logged in to submit a request', { variant: 'error' });
+      return;
+    }
+    const selectedMark = marks.find((m) => getSubjectId(m) === values.subjectId);
     setIsSubmitting(true);
     try {
+      const token = localStorage.getItem('auth_token');
       const res = await fetch(`${API_URL}/requests`, {
         method: 'POST',
-        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
         },
         body: JSON.stringify({
+          studentId: user.id,
           subjectId: values.subjectId,
           requestType: type,
           reason: values.reason,
+          currentMarks: selectedMark?.totalMarks ?? null,
         }),
       });
 
@@ -122,8 +144,9 @@ export default function ApplyForm({ type }) {
     }
   };
 
+  const watchedSubjectId = watch('subjectId');
   const selectedSubject = marks.find(
-    (m) => m.subjectId === watch('subjectId')
+    (m) => getSubjectId(m) === watchedSubjectId
   );
   const reasonValue = watch('reason') || '';
 
@@ -194,11 +217,15 @@ export default function ApplyForm({ type }) {
                   }
                   sx={{ mb: 3 }}
                 >
-                  {marks.map((mark) => (
-                    <MenuItem key={mark.subjectId} value={mark.subjectId}>
-                      {mark.subject.code} - {mark.subject.name}
-                    </MenuItem>
-                  ))}
+                  {marks.map((mark) => {
+                    const sid = getSubjectId(mark);
+                    const subj = mark.subjectId && typeof mark.subjectId === 'object' ? mark.subjectId : {};
+                    return (
+                      <MenuItem key={mark._id || sid} value={sid || ''}>
+                        {subj.code ?? '—'} - {subj.name ?? '—'}
+                      </MenuItem>
+                    );
+                  })}
                 </TextField>
               )}
             />

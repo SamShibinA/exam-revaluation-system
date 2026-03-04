@@ -48,8 +48,8 @@ export default function ManageStudentsPage() {
   // Filter students based on search
   const filteredStudents = students.filter(
     (student) =>
-      student.name.toLowerCase().includes(search.toLowerCase()) ||
-      student.studentId.toLowerCase().includes(search.toLowerCase())
+      (student.name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (student.studentId || "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (

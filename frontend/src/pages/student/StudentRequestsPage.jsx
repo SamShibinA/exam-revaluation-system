@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { PageLoader } from '../../components/mui/PageLoader';
 import { StatusBadge } from '../../components/mui/StatusBadge';
 import { RequestTimeline } from '../../components/mui/RequestTimeline';
@@ -27,16 +28,23 @@ import {
 import { format } from 'date-fns';
 
 export default function StudentRequestsPage() {
+  const { user } = useAuth();
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
+
     const fetchRequests = async () => {
       try {
-        const res = await fetch(`${API_URL}/requests/me`, {
-          credentials: 'include',
+        const token = localStorage.getItem('auth_token');
+        const res = await fetch(`${API_URL}/requests/my/${user.id}`, {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` }),
           },
         });
 
@@ -46,16 +54,17 @@ export default function StudentRequestsPage() {
           throw new Error(data.message || 'Failed to fetch requests');
         }
 
-        setRequests(data);
+        setRequests(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Failed to fetch requests:', error);
+        setRequests([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchRequests();
-  }, []);
+  }, [user?.id]);
 
   if (isLoading) {
     return <PageLoader />;

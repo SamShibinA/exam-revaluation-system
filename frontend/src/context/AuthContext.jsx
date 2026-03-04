@@ -83,7 +83,7 @@ export function AuthProvider({ children }) {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/login",
+        `${import.meta.env.VITE_BACKEND_URL}/auth/login`,
         {
           method: "POST",
           headers: {
@@ -103,6 +103,7 @@ export function AuthProvider({ children }) {
       localStorage.setItem("auth_user", JSON.stringify(data.user));
 
       dispatch({ type: "AUTH_SUCCESS", payload: data });
+      return data; // Return data for caller to handle redirects
     } catch (error) {
       dispatch({ type: "AUTH_FAILURE" });
       throw error;

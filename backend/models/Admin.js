@@ -14,6 +14,10 @@ const AdminSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
+    password: {
+      type: String,
+      required: true,
+    },
     department: {
       type: String,
       default: "Exam Department",

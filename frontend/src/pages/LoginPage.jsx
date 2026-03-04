@@ -33,12 +33,12 @@ export default function LoginPage() {
     }
 
     try {
-      await login({ email, password });
+      const data = await login({ email, password });
       enqueueSnackbar('Welcome back! You have successfully logged in.', {
         variant: 'success',
       });
 
-      if (email.includes('admin')) {
+      if (data.user.role === 'admin') {
         navigate('/admin');
       } else {
         navigate('/student');

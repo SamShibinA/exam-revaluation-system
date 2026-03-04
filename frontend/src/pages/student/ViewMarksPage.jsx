@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { PageLoader } from '../../components/mui/PageLoader';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -18,6 +19,7 @@ import {
   TableRow,
   Paper,
   Grid,
+  Alert,
 } from '@mui/material';
 
 const getGradeColor = (grade) => {
@@ -38,16 +40,25 @@ const getGradeColor = (grade) => {
 };
 
 export default function ViewMarksPage() {
+  const { user } = useAuth();
   const [marks, setMarks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!user?.id) {
+      setIsLoading(false);
+      return;
+    }
+
     const fetchMarks = async () => {
       try {
-        const res = await fetch(`${API_URL}/marks`, {
-          credentials: 'include',
+        setError(null);
+        const token = localStorage.getItem('auth_token');
+        const res = await fetch(`${API_URL}/marks/${user.id}`, {
           headers: {
             'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` }),
           },
         });
 
@@ -57,24 +68,31 @@ export default function ViewMarksPage() {
           throw new Error(data.message || 'Failed to fetch marks');
         }
 
-        setMarks(data);
-      } catch (error) {
-        console.error('Failed to fetch marks:', error);
+        setMarks(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Failed to fetch marks:', err);
+        setError(err.message || 'Failed to fetch marks');
+        setMarks([]);
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchMarks();
-  }, []);
+  }, [user?.id]);
+
+  if (!user) {
+    return null; // or redirect; AuthProvider handles loading
+  }
 
   if (isLoading) {
     return <PageLoader />;
   }
 
-  const totalCredits = marks.reduce((sum, m) => sum + (m.subject?.credits || 0), 0);
+  const subjectRef = (m) => m.subjectId && typeof m.subjectId === 'object' ? m.subjectId : {};
+  const totalCredits = marks.reduce((sum, m) => sum + (subjectRef(m).credits || 0), 0);
   const weightedSum = marks.reduce(
-    (sum, m) => sum + m.totalMarks * (m.subject?.credits || 0),
+    (sum, m) => sum + (m.totalMarks || 0) * (subjectRef(m).credits || 0),
     0
   );
   const sgpa =
@@ -94,6 +112,12 @@ export default function ViewMarksPage() {
           Your academic performance for the current semester
         </Typography>
       </Box>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
 
       {/* Summary Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -159,38 +183,41 @@ export default function ViewMarksPage() {
               </TableHead>
 
               <TableBody>
-                {marks.map((mark) => (
-                  <TableRow key={mark.id || mark._id} hover>
-                    <TableCell>
-                      <Typography fontWeight={500}>
-                        {mark.subject?.code}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>{mark.subject?.name}</TableCell>
-                    <TableCell align="center">
-                      {mark.subject?.credits}
-                    </TableCell>
-                    <TableCell align="center">
-                      {mark.internalMarks}
-                    </TableCell>
-                    <TableCell align="center">
-                      {mark.externalMarks}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Typography fontWeight={500}>
-                        {mark.totalMarks}
-                      </Typography>
-                    </TableCell>
-                    <TableCell align="center">
-                      <Chip
-                        label={mark.grade}
-                        color={getGradeColor(mark.grade)}
-                        size="small"
-                        sx={{ fontWeight: 600 }}
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {marks.map((mark) => {
+                  const subj = subjectRef(mark);
+                  return (
+                    <TableRow key={mark._id || mark.id} hover>
+                      <TableCell>
+                        <Typography fontWeight={500}>
+                          {subj.code ?? '—'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{subj.name ?? '—'}</TableCell>
+                      <TableCell align="center">
+                        {subj.credits ?? '—'}
+                      </TableCell>
+                      <TableCell align="center">
+                        {mark.internalMarks ?? '—'}
+                      </TableCell>
+                      <TableCell align="center">
+                        {mark.externalMarks ?? '—'}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Typography fontWeight={500}>
+                          {mark.totalMarks ?? '—'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          label={mark.grade ?? '—'}
+                          color={getGradeColor(mark.grade)}
+                          size="small"
+                          sx={{ fontWeight: 600 }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </TableContainer>

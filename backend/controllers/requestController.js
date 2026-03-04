@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Request from "../models/Request.js";
 import Student from "../models/Student.js";
 import Subject from "../models/Subject.js";
@@ -7,6 +8,15 @@ export const getMyRequests = async (req, res) => {
   try {
     const { studentId } = req.params;
 
+    if (!mongoose.Types.ObjectId.isValid(studentId)) {
+      return res.status(400).json({ message: "Invalid student ID" });
+    }
+
+    // Students can only fetch their own requests
+    if (req.user?.id && req.user.id !== studentId) {
+      return res.status(403).json({ message: "Not allowed to view another student's requests" });
+    }
+
     const requests = await Request.find({ studentId })
       .populate("subjectId", "code name semester credits")
       .sort({ createdAt: -1 });
@@ -14,8 +24,8 @@ export const getMyRequests = async (req, res) => {
     const formattedRequests = requests.map((r) => ({
       id: r._id,
       studentId: r.studentId,
-      subjectId: r.subjectId._id,
-      subject: r.subjectId,
+      subjectId: r.subjectId?._id ?? r.subjectId,
+      subject: r.subjectId || {},
       requestType: r.requestType,
       reason: r.reason,
       currentMarks: r.currentMarks,
@@ -28,6 +38,7 @@ export const getMyRequests = async (req, res) => {
 
     res.json(formattedRequests);
   } catch (error) {
+    console.error("getMyRequests error:", error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -37,14 +48,26 @@ export const createRequest = async (req, res) => {
   try {
     const { studentId, subjectId, requestType, reason, currentMarks } = req.body;
 
+    if (!studentId || !subjectId || !requestType || !reason) {
+      return res.status(400).json({ message: "studentId, subjectId, requestType and reason are required" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(studentId) || !mongoose.Types.ObjectId.isValid(subjectId)) {
+      return res.status(400).json({ message: "Invalid studentId or subjectId" });
+    }
+
+    // Students can only create requests for themselves
+    if (req.user?.id && req.user.id !== studentId) {
+      return res.status(403).json({ message: "Not allowed to create request for another student" });
+    }
+
     const newRequest = new Request({
       studentId,
       subjectId,
       requestType,
       reason,
-      currentMarks,
+      currentMarks: currentMarks ?? null,
       status: "pending",
-      createdAt: new Date(),
     });
 
     await newRequest.save();
@@ -54,6 +77,7 @@ export const createRequest = async (req, res) => {
 
     res.status(201).json(populatedRequest);
   } catch (error) {
+    console.error("createRequest error:", error);
     res.status(500).json({ message: error.message });
   }
 };

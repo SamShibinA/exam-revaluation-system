@@ -9,7 +9,7 @@ const statusConfig = {
 };
 
 export function StatusBadge({ status }) {
-  const config = statusConfig[status];
+  const config = statusConfig[status] || { label: status || 'Unknown', color: 'default' };
 
   return (
     <Chip
