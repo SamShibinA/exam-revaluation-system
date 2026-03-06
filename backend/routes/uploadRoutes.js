@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
 import Upload from "../models/Upload.js";
+import Request from "../models/Request.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -21,18 +22,27 @@ router.post(
   async (req, res) => {
     try {
       const { requestId, documentType } = req.body;
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
 
       const newUpload = new Upload({
         requestId,
         documentType,
         filename: req.file.filename,
-        fileUrl: `/uploads/${req.file.filename}`,
+        fileUrl: `${baseUrl}/uploads/${req.file.filename}`,
         uploadedBy: req.user.id,
       });
 
       await newUpload.save();
+
+      if (documentType === "response_sheet") {
+        await Request.findByIdAndUpdate(requestId, {
+          responseSheet: newUpload.fileUrl,
+        });
+      }
+
       res.status(201).json(newUpload);
     } catch (error) {
+      console.error(error);
       res.status(500).json({ message: "Upload failed" });
     }
   }

@@ -16,6 +16,7 @@ import StudentDashboard from "./pages/student/StudentDashboard";
 import ViewMarksPage from "./pages/student/ViewMarksPage";
 import ApplyForm from "./pages/student/ApplyForm";
 import StudentRequestsPage from "./pages/student/StudentRequestsPage";
+import ViewDocumentPage from "./pages/student/ViewDocumentPage";
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -69,6 +70,7 @@ const AppRoutes = () => {
         <Route path="apply-review" element={<ApplyForm type="review" />} />
         <Route path="apply-revaluation" element={<ApplyForm type="revaluation" />} />
         <Route path="requests" element={<StudentRequestsPage />} />
+        <Route path="view-document" element={<ViewDocumentPage />} />
       </Route>
 
       {/* Admin Routes */}

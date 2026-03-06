@@ -34,46 +34,46 @@ export default function StudentDashboard() {
   const [recentRequests, setRecentRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const studentId = user.id;
-      const token = localStorage.getItem("auth_token");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const studentId = user.id;
+        const token = localStorage.getItem("auth_token");
 
-      const statsRes = await fetch(
-        `${BASE_URL}/student/stats/${studentId}`,
-        {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+        const statsRes = await fetch(
+          `${BASE_URL}/student/stats/${studentId}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      const requestsRes = await fetch(
-        `${BASE_URL}/requests/my/${studentId}`,
-        {
-          headers: {
-            "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+        const requestsRes = await fetch(
+          `${BASE_URL}/requests/my/${studentId}`,
+          {
+            headers: {
+              "Authorization": `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-      const statsData = await statsRes.json();
-      const requestsData = await requestsRes.json();
+        const statsData = await statsRes.json();
+        const requestsData = await requestsRes.json();
 
-      setStats(statsData);
-      setRecentRequests(requestsData.slice(0, 3));
-    } catch (error) {
-      console.error("Failed to fetch dashboard data:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        setStats(statsData);
+        setRecentRequests(requestsData.slice(0, 3));
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  if (user) fetchData();
-}, [user]);
+    if (user) fetchData();
+  }, [user]);
 
 
   if (isLoading) {
@@ -84,18 +84,31 @@ useEffect(() => {
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
       {/* Welcome Section */}
       <Box
+        className="animate-fade-in-up"
         sx={{
-          background: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
-          borderRadius: { xs: 2, sm: 3 },
-          p: { xs: 2, sm: 3 },
-          mb: { xs: 2, sm: 3 },
+          background: 'linear-gradient(135deg, #0a5f58 0%, #0f766e 40%, #14b8a6 100%)',
+          borderRadius: { xs: 3, sm: 4 },
+          p: { xs: 2.5, sm: 3.5 },
+          mb: { xs: 2.5, sm: 3 },
           color: 'white',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
-        <Typography variant="h5" fontWeight={700} sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' } }}>
-          Welcome back, {user?.name}!
+        {/* Pattern overlay */}
+        <Box sx={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          width: '50%',
+          background: 'radial-gradient(circle at 80% 50%, rgba(255,255,255,0.08) 0%, transparent 60%)',
+          pointerEvents: 'none',
+        }} />
+        <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: '1.2rem', sm: '1.6rem' }, position: 'relative', letterSpacing: '-0.02em' }}>
+          Welcome back, {user?.name}! 👋
         </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.9, fontSize: { xs: '0.7rem', sm: '0.75rem' } }}>
+        <Typography variant="body2" sx={{ opacity: 0.85, fontSize: { xs: '0.75rem', sm: '0.8rem' }, mt: 0.5, position: 'relative' }}>
           Student ID: {user?.studentId} • {user?.department}
         </Typography>
       </Box>
@@ -144,57 +157,55 @@ useEffect(() => {
       <Grid container spacing={3} sx={{ mb: 3 }}>
         {/* Quick Actions */}
         <Grid item xs={12} lg={6}>
-          <Card>
+          <Card className="animate-fade-in-up animate-stagger-2">
             <CardHeader title="Quick Actions" titleTypographyProps={{ variant: 'h6' }} />
             <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-              <Button
-                component={Link}
-                to="/student/marks"
-                variant="outlined"
-                fullWidth
-                sx={{ justifyContent: 'space-between' }}
-                endIcon={<ArrowIcon />}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <FileIcon fontSize="small" />
-                  View My Marks
-                </Box>
-              </Button>
-
-              <Button
-                component={Link}
-                to="/student/apply-review"
-                variant="outlined"
-                fullWidth
-                sx={{ justifyContent: 'space-between' }}
-                endIcon={<ArrowIcon />}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <ClipboardIcon fontSize="small" />
-                  Apply for Review
-                </Box>
-              </Button>
-
-              <Button
-                component={Link}
-                to="/student/apply-revaluation"
-                variant="outlined"
-                fullWidth
-                sx={{ justifyContent: 'space-between' }}
-                endIcon={<ArrowIcon />}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <CheckCircleIcon fontSize="small" />
-                  Apply for Revaluation
-                </Box>
-              </Button>
+              {[
+                { to: '/student/marks', icon: <FileIcon fontSize="small" />, label: 'View My Marks', color: '#0f766e' },
+                { to: '/student/apply-review', icon: <ClipboardIcon fontSize="small" />, label: 'Apply for Review', color: '#0ea5e9' },
+                { to: '/student/apply-revaluation', icon: <CheckCircleIcon fontSize="small" />, label: 'Apply for Revaluation', color: '#8b5cf6' },
+              ].map((action) => (
+                <Button
+                  key={action.to}
+                  component={Link}
+                  to={action.to}
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    justifyContent: 'space-between',
+                    py: 1.3,
+                    borderColor: 'rgba(204, 251, 241, 0.6)',
+                    '&:hover': {
+                      borderColor: action.color,
+                      backgroundColor: `${action.color}08`,
+                    },
+                  }}
+                  endIcon={<ArrowIcon />}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 2,
+                      backgroundColor: `${action.color}12`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: action.color,
+                    }}>
+                      {action.icon}
+                    </Box>
+                    {action.label}
+                  </Box>
+                </Button>
+              ))}
             </CardContent>
           </Card>
         </Grid>
 
         {/* Recent Requests */}
         <Grid item xs={12} lg={6}>
-          <Card>
+          <Card className="animate-fade-in-up animate-stagger-3">
             <CardHeader
               title="Recent Requests"
               titleTypographyProps={{ variant: 'h6' }}
@@ -212,7 +223,7 @@ useEffect(() => {
             <CardContent>
               {recentRequests.length === 0 ? (
                 <Box sx={{ textAlign: 'center', py: 4 }}>
-                  <ClipboardIcon sx={{ fontSize: 48, color: 'grey.300' }} />
+                  <Typography variant="h3" sx={{ opacity: 0.1 }}>📋</Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
                     No requests yet
                   </Typography>
@@ -228,12 +239,17 @@ useEffect(() => {
                         justifyContent: 'space-between',
                         p: 2,
                         border: '1px solid',
-                        borderColor: 'divider',
-                        borderRadius: 2,
+                        borderColor: 'rgba(204, 251, 241, 0.5)',
+                        borderRadius: 3,
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          borderColor: 'primary.light',
+                          backgroundColor: 'rgba(240, 253, 250, 0.5)',
+                        },
                       }}
                     >
                       <Box>
-                        <Typography variant="body2" fontWeight={500}>
+                        <Typography variant="body2" fontWeight={600}>
                           {request.subject.code} - {request.subject.name}
                         </Typography>
                         <Typography variant="caption" color="text.secondary">
@@ -251,101 +267,44 @@ useEffect(() => {
       </Grid>
 
       {/* Request Summary */}
-      <Card>
+      <Card className="animate-fade-in-up animate-stagger-4">
         <CardHeader title="Request Summary" titleTypographyProps={{ variant: 'h6' }} />
         <CardContent>
           <Grid container spacing={2}>
-            <Grid item xs={6} sm={3}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  p: 2,
-                  bgcolor: 'warning.50',
-                  borderRadius: 2,
-                }}
-              >
-                <ClockIcon sx={{ fontSize: 32, color: 'warning.main' }} />
-                <Box>
-                  <Typography variant="h5" fontWeight={700}>
-                    {stats?.pendingRequests || 0}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Pending
-                  </Typography>
+            {[
+              { label: 'Pending', value: stats?.pendingRequests || 0, icon: <ClockIcon sx={{ fontSize: 28 }} />, color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.08)' },
+              { label: 'In Review', value: stats?.inReviewRequests || 0, icon: <FileIcon sx={{ fontSize: 28 }} />, color: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.08)' },
+              { label: 'Approved', value: stats?.approvedRequests || 0, icon: <CheckCircleIcon sx={{ fontSize: 28 }} />, color: '#22c55e', bg: 'rgba(34, 197, 94, 0.08)' },
+              { label: 'Rejected', value: stats?.rejectedRequests || 0, icon: <CancelIcon sx={{ fontSize: 28 }} />, color: '#ef4444', bg: 'rgba(239, 68, 68, 0.08)' },
+            ].map((item) => (
+              <Grid item xs={6} sm={3} key={item.label}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    p: 2,
+                    bgcolor: item.bg,
+                    borderRadius: 3,
+                    transition: 'all 0.2s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 4px 12px -4px ${item.color}30`,
+                    },
+                  }}
+                >
+                  <Box sx={{ color: item.color }}>{item.icon}</Box>
+                  <Box>
+                    <Typography variant="h5" fontWeight={800}>
+                      {item.value}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                      {item.label}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            </Grid>
-
-            <Grid item xs={6} sm={3}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  p: 2,
-                  bgcolor: 'info.50',
-                  borderRadius: 2,
-                }}
-              >
-                <FileIcon sx={{ fontSize: 32, color: 'info.main' }} />
-                <Box>
-                  <Typography variant="h5" fontWeight={700}>
-                    {stats?.inReviewRequests || 0}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    In Review
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-
-            <Grid item xs={6} sm={3}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  p: 2,
-                  bgcolor: 'success.50',
-                  borderRadius: 2,
-                }}
-              >
-                <CheckCircleIcon sx={{ fontSize: 32, color: 'success.main' }} />
-                <Box>
-                  <Typography variant="h5" fontWeight={700}>
-                    {stats?.approvedRequests || 0}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Approved
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-
-            <Grid item xs={6} sm={3}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  p: 2,
-                  bgcolor: 'error.50',
-                  borderRadius: 2,
-                }}
-              >
-                <CancelIcon sx={{ fontSize: 32, color: 'error.main' }} />
-                <Box>
-                  <Typography variant="h5" fontWeight={700}>
-                    {stats?.rejectedRequests || 0}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Rejected
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
+              </Grid>
+            ))}
           </Grid>
         </CardContent>
       </Card>

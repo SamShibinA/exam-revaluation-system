@@ -32,6 +32,7 @@ export const getMyRequests = async (req, res) => {
       status: r.status,
       updatedMarks: r.updatedMarks,
       adminRemarks: r.adminRemarks,
+      responseSheet: r.responseSheet,
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
     }));
@@ -132,6 +133,7 @@ export const getAllRequests = async (req, res) => {
       currentMarks: r.currentMarks,
       updatedMarks: r.updatedMarks,
       adminRemarks: r.adminRemarks,
+      responseSheet: r.responseSheet,
       status: r.status,
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,

@@ -38,6 +38,7 @@ const studentNavItems = [
   { label: 'Apply for Review', href: '/student/apply-review', icon: AssignmentIcon },
   { label: 'Apply for Revaluation', href: '/student/apply-revaluation', icon: CheckBoxIcon },
   { label: 'Request Status', href: '/student/requests', icon: HistoryIcon },
+  { label: 'View Document', href: '/student/view-document', icon: CloudUploadIcon },
 ];
 
 const adminNavItems = [
@@ -75,44 +76,72 @@ export function Sidebar({ mobileOpen = false, onClose }) {
           alignItems: 'center',
           justifyContent: isMobile || !collapsed ? 'flex-start' : 'center',
           px: 2,
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
         }}
       >
         <Box
           sx={{
             width: 40,
             height: 40,
-            borderRadius: 2,
-            backgroundColor: 'rgba(255,255,255,0.2)',
+            borderRadius: 2.5,
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.1) 100%)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            transition: 'transform 0.3s ease',
+            '&:hover': {
+              transform: 'rotate(8deg) scale(1.05)',
+            },
           }}
         >
-          <SchoolIcon />
+          <SchoolIcon sx={{ fontSize: 22 }} />
         </Box>
         {(isMobile || !collapsed) && (
-          <Typography variant="h6" sx={{ ml: 1.5, fontWeight: 600 }}>
-            ERS Portal
-          </Typography>
+          <Box sx={{ ml: 1.5 }}>
+            <Typography variant="h6" sx={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+              ERS Portal
+            </Typography>
+            <Typography variant="caption" sx={{ opacity: 0.5, fontSize: '0.6rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+              Exam Revaluation
+            </Typography>
+          </Box>
         )}
       </Box>
 
       {/* User Info */}
       {(isMobile || !collapsed) && user && (
-        <Box sx={{ p: 2, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+        <Box sx={{
+          p: 2,
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            p: 1.5,
+            borderRadius: 2.5,
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.04) 100%)',
+            backdropFilter: 'blur(8px)',
+          }}>
             <Avatar
-              sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 40, height: 40 }}
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.2)',
+                width: 40,
+                height: 40,
+                fontSize: '1rem',
+                fontWeight: 700,
+                border: '2px solid rgba(255,255,255,0.2)',
+              }}
             >
               {user.name.charAt(0).toUpperCase()}
             </Avatar>
             <Box sx={{ minWidth: 0, flex: 1 }}>
-              <Typography variant="body2" fontWeight={500} noWrap>
+              <Typography variant="body2" fontWeight={600} noWrap>
                 {user.name}
               </Typography>
-              <Typography variant="caption" sx={{ opacity: 0.7 }} noWrap>
-                {isAdmin ? 'Admin' : user.studentId}
+              <Typography variant="caption" sx={{ opacity: 0.6 }} noWrap>
+                {isAdmin ? '🛡️ Administrator' : `📚 ${user.studentId}`}
               </Typography>
             </Box>
           </Box>
@@ -120,47 +149,90 @@ export function Sidebar({ mobileOpen = false, onClose }) {
       )}
 
       {/* Navigation */}
-      <Box sx={{ flex: 1, py: 1, overflowY: 'auto' }}>
+      <Box sx={{ flex: 1, py: 1.5, overflowY: 'auto', px: 0.5 }}>
+        {(isMobile || !collapsed) && (
+          <Typography
+            variant="caption"
+            sx={{
+              px: 2,
+              py: 1,
+              display: 'block',
+              opacity: 0.4,
+              fontSize: '0.6rem',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              fontWeight: 700,
+            }}
+          >
+            Navigation
+          </Typography>
+        )}
         <List>
-          {navItems.map((item) => {
+          {navItems.map((item, index) => {
             const isActive = location.pathname === item.href;
             const Icon = item.icon;
 
             const button = (
-              <ListItem key={item.href} disablePadding sx={{ px: 1, mb: 0.5 }}>
+              <ListItem key={item.href} disablePadding sx={{ px: 0.5, mb: 0.3 }}>
                 <ListItemButton
                   component={Link}
                   to={item.href}
                   onClick={handleNavClick}
                   sx={{
-                    borderRadius: 2,
+                    borderRadius: 2.5,
                     minHeight: 44,
                     justifyContent: isMobile || !collapsed ? 'flex-start' : 'center',
                     backgroundColor: isActive
-                      ? 'rgba(255,255,255,0.2)'
+                      ? 'rgba(255,255,255,0.18)'
                       : 'transparent',
+                    position: 'relative',
+                    overflow: 'hidden',
+                    transition: 'all 0.2s ease',
+                    '&::before': isActive ? {
+                      content: '""',
+                      position: 'absolute',
+                      left: 0,
+                      top: '20%',
+                      bottom: '20%',
+                      width: 3,
+                      borderRadius: '0 4px 4px 0',
+                      background: 'rgba(255,255,255,0.9)',
+                    } : {},
                     '&:hover': {
-                      backgroundColor: 'rgba(255,255,255,0.15)',
+                      backgroundColor: isActive
+                        ? 'rgba(255,255,255,0.22)'
+                        : 'rgba(255,255,255,0.1)',
                     },
                   }}
                 >
                   <ListItemIcon
                     sx={{
                       minWidth: 0,
-                      mr: isMobile || !collapsed ? 2 : 0,
+                      mr: isMobile || !collapsed ? 1.5 : 0,
                       justifyContent: 'center',
                       color: 'inherit',
+                      opacity: isActive ? 1 : 0.7,
+                      transition: 'all 0.2s ease',
                     }}
                   >
-                    <Icon />
+                    <Icon sx={{ fontSize: 20 }} />
                   </ListItemIcon>
-                  {(isMobile || !collapsed) && <ListItemText primary={item.label} />}
+                  {(isMobile || !collapsed) && (
+                    <ListItemText
+                      primary={item.label}
+                      primaryTypographyProps={{
+                        fontSize: '0.83rem',
+                        fontWeight: isActive ? 600 : 400,
+                        letterSpacing: isActive ? '0.01em' : 0,
+                      }}
+                    />
+                  )}
                 </ListItemButton>
               </ListItem>
             );
 
             return !isMobile && collapsed ? (
-              <Tooltip key={item.href} title={item.label} placement="right">
+              <Tooltip key={item.href} title={item.label} placement="right" arrow>
                 {button}
               </Tooltip>
             ) : (
@@ -184,22 +256,21 @@ export function Sidebar({ mobileOpen = false, onClose }) {
           border: '1px solid',
           borderColor: 'divider',
           color: 'text.primary',
-          boxShadow: 2,
+          boxShadow: 3,
           '&:hover': {
             backgroundColor: 'grey.100',
           },
         }}
       >
         {collapsed ? (
-          <ChevronRightIcon sx={{ fontSize: 16 }} />
+          <ChevronRightIcon sx={{ fontSize: 14 }} />
         ) : (
-          <ChevronLeftIcon sx={{ fontSize: 16 }} />
+          <ChevronLeftIcon sx={{ fontSize: 14 }} />
         )}
       </IconButton>
 
       {/* Logout */}
-      <Divider sx={{ borderColor: 'rgba(255,255,255,0.1)' }} />
-      <Box sx={{ p: 1 }}>
+      <Box sx={{ p: 1, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
         <Tooltip title="Logout" placement="right">
           <ListItemButton
             onClick={() => {
@@ -207,25 +278,36 @@ export function Sidebar({ mobileOpen = false, onClose }) {
               logout();
             }}
             sx={{
-              borderRadius: 2,
+              borderRadius: 2.5,
               minHeight: 44,
               justifyContent: isMobile || !collapsed ? 'flex-start' : 'center',
+              transition: 'all 0.2s ease',
               '&:hover': {
                 backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                '& .MuiListItemIcon-root': {
+                  color: '#fca5a5',
+                },
               },
             }}
           >
             <ListItemIcon
               sx={{
                 minWidth: 0,
-                mr: isMobile || !collapsed ? 2 : 0,
+                mr: isMobile || !collapsed ? 1.5 : 0,
                 justifyContent: 'center',
                 color: 'inherit',
+                opacity: 0.7,
+                transition: 'all 0.2s ease',
               }}
             >
-              <LogoutIcon />
+              <LogoutIcon sx={{ fontSize: 20 }} />
             </ListItemIcon>
-            {(isMobile || !collapsed) && <ListItemText primary="Logout" />}
+            {(isMobile || !collapsed) && (
+              <ListItemText
+                primary="Logout"
+                primaryTypographyProps={{ fontSize: '0.83rem' }}
+              />
+            )}
           </ListItemButton>
         </Tooltip>
       </Box>
@@ -238,10 +320,11 @@ export function Sidebar({ mobileOpen = false, onClose }) {
     '& .MuiDrawer-paper': {
       width: isMobile ? drawerWidth : width,
       boxSizing: 'border-box',
-      backgroundColor: 'primary.main',
+      background: 'linear-gradient(180deg, #0a5f58 0%, #0f766e 30%, #0d6b64 70%, #0a5f58 100%)',
       color: 'primary.contrastText',
-      transition: isMobile ? 'none' : 'width 0.3s ease',
+      transition: isMobile ? 'none' : 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
       overflowX: 'hidden',
+      borderRight: 'none',
       ...(isMobile && { boxSizing: 'border-box', top: 0, left: 0 }),
     },
   };

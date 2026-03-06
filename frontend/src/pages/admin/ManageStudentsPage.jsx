@@ -9,8 +9,9 @@ import {
   InputAdornment,
   Avatar,
   Grid,
+  Divider,
 } from "@mui/material";
-import { Search as SearchIcon } from "@mui/icons-material";
+import { Search as SearchIcon, Email as EmailIcon, School as SchoolIcon, Business as DeptIcon } from "@mui/icons-material";
 
 export default function ManageStudentsPage() {
   const token = localStorage.getItem("auth_token");
@@ -19,21 +20,16 @@ export default function ManageStudentsPage() {
   const [students, setStudents] = useState([]);
   const [search, setSearch] = useState("");
 
-  // Fetch students from backend
   useEffect(() => {
     const fetchStudents = async () => {
       try {
         const res = await fetch(`${BASE_URL}/students`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         const data = await res.json();
         if (Array.isArray(data)) {
           setStudents(data);
         } else {
-          console.error("API returned non-array for students:", data);
           setStudents([]);
         }
       } catch (error) {
@@ -41,33 +37,39 @@ export default function ManageStudentsPage() {
         setStudents([]);
       }
     };
-
     fetchStudents();
   }, []);
 
-  // Filter students based on search
   const filteredStudents = students.filter(
     (student) =>
       (student.name || "").toLowerCase().includes(search.toLowerCase()) ||
       (student.studentId || "").toLowerCase().includes(search.toLowerCase())
   );
 
+  const getAvatarGradient = (name) => {
+    const gradients = [
+      'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
+      'linear-gradient(135deg, #2563eb 0%, #60a5fa 100%)',
+      'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
+      'linear-gradient(135deg, #059669 0%, #34d399 100%)',
+      'linear-gradient(135deg, #d97706 0%, #fbbf24 100%)',
+      'linear-gradient(135deg, #dc2626 0%, #f87171 100%)',
+    ];
+    const index = (name || '').charCodeAt(0) % gradients.length;
+    return gradients[index];
+  };
+
   return (
     <Box sx={{ width: "100%", overflow: "hidden" }}>
-      <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-        <Typography
-          variant="h5"
-          fontWeight={700}
-          sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" } }}
-        >
-          Manage Students
+      <Box sx={{ mb: { xs: 2, sm: 3 } }} className="animate-fade-in-up">
+        <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" }, letterSpacing: '-0.02em' }}>
+          Manage Students 👨‍🎓
         </Typography>
         <Typography variant="body2" color="text.secondary">
           View and manage student records
         </Typography>
       </Box>
 
-      {/* Search */}
       <TextField
         placeholder="Search students by name or ID..."
         size="small"
@@ -84,70 +86,64 @@ export default function ManageStudentsPage() {
         }}
       />
 
-      {/* Students Grid */}
-      <Grid container spacing={2}>
-        {filteredStudents.map((student) => (
+      <Grid container spacing={2.5}>
+        {filteredStudents.map((student, idx) => (
           <Grid item xs={12} sm={6} lg={4} key={student._id}>
             <Card
+              className={`animate-fade-in-up animate-stagger-${Math.min(idx + 1, 6)}`}
               sx={{
-                transition: "box-shadow 0.2s",
-                "&:hover": { boxShadow: 4 },
+                cursor: 'default',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: '0 12px 32px -8px rgba(15, 118, 110, 0.15)',
+                },
               }}
             >
               <CardHeader
                 avatar={
-                  <Avatar sx={{ bgcolor: "primary.100", color: "primary.main" }}>
+                  <Avatar sx={{
+                    background: getAvatarGradient(student.name),
+                    fontWeight: 700,
+                    width: 44,
+                    height: 44,
+                    boxShadow: '0 4px 12px -4px rgba(0,0,0,0.2)',
+                  }}>
                     {student.name.charAt(0)}
                   </Avatar>
                 }
                 title={student.name}
                 subheader={student.studentId}
-                titleTypographyProps={{ fontWeight: 500 }}
+                titleTypographyProps={{ fontWeight: 700 }}
+                subheaderTypographyProps={{ fontFamily: 'monospace', fontSize: '0.7rem' }}
               />
-              <CardContent sx={{ pt: 0 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 1,
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    Email
-                  </Typography>
-                  <Typography variant="body2" noWrap sx={{ maxWidth: 150 }}>
-                    {student.email}
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    mb: 1,
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    Department
-                  </Typography>
-                  <Typography variant="body2">
-                    {student.department}
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    Semester
-                  </Typography>
-                  <Typography variant="body2">
-                    {student.currentSemester}
-                  </Typography>
-                </Box>
+              <Divider sx={{ mx: 2 }} />
+              <CardContent sx={{ pt: 2 }}>
+                {[
+                  { icon: <EmailIcon sx={{ fontSize: 16, color: 'text.secondary' }} />, label: 'Email', value: student.email },
+                  { icon: <DeptIcon sx={{ fontSize: 16, color: 'text.secondary' }} />, label: 'Department', value: student.department },
+                  { icon: <SchoolIcon sx={{ fontSize: 16, color: 'text.secondary' }} />, label: 'Semester', value: student.currentSemester },
+                ].map((item) => (
+                  <Box
+                    key={item.label}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: 'center',
+                      mb: 1,
+                      '&:last-child': { mb: 0 },
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.8 }}>
+                      {item.icon}
+                      <Typography variant="body2" color="text.secondary">
+                        {item.label}
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" fontWeight={500} noWrap sx={{ maxWidth: 150, textAlign: 'right' }}>
+                      {item.value}
+                    </Typography>
+                  </Box>
+                ))}
               </CardContent>
             </Card>
           </Grid>

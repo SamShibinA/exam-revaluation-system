@@ -49,11 +49,12 @@ export function Navbar({ title, onMenuClick }) {
     <AppBar
       position="sticky"
       sx={{
-        backgroundColor: 'background.paper',
+        backgroundColor: 'rgba(255, 255, 255, 0.75)',
+        backdropFilter: 'blur(16px)',
         color: 'text.primary',
       }}
     >
-      <Toolbar sx={{ gap: { xs: 1, sm: 2 }, minHeight: { xs: 56, sm: 64 }, px: { xs: 1, sm: 2 } }}>
+      <Toolbar sx={{ gap: { xs: 1, sm: 2 }, minHeight: { xs: 56, sm: 64 }, px: { xs: 1.5, sm: 2.5 } }}>
         <IconButton
           color="inherit"
           aria-label="open menu"
@@ -64,7 +65,7 @@ export function Navbar({ title, onMenuClick }) {
           <MenuIcon />
         </IconButton>
         {title && (
-          <Typography variant="h6" fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' }, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' }, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {title}
           </Typography>
         )}
@@ -79,7 +80,15 @@ export function Navbar({ title, onMenuClick }) {
             display: { xs: 'none', md: 'block' },
             width: 250,
             '& .MuiOutlinedInput-root': {
-              backgroundColor: 'grey.100',
+              backgroundColor: 'rgba(240, 253, 250, 0.6)',
+              borderRadius: 2.5,
+              fontSize: '0.85rem',
+              '& fieldset': {
+                borderColor: 'rgba(204, 251, 241, 0.5)',
+              },
+              '&:hover fieldset': {
+                borderColor: 'rgba(15, 118, 110, 0.3)',
+              },
             },
           }}
           InputProps={{
@@ -92,7 +101,23 @@ export function Navbar({ title, onMenuClick }) {
         />
 
         {/* Notifications */}
-        <IconButton onClick={handleNotifOpen}>
+        <IconButton
+          onClick={handleNotifOpen}
+          sx={{
+            position: 'relative',
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              backgroundColor: '#ef4444',
+              animation: 'pulseRing 2s infinite',
+            },
+          }}
+        >
           <Badge badgeContent={3} color="error">
             <NotificationsIcon />
           </Badge>
@@ -103,80 +128,137 @@ export function Navbar({ title, onMenuClick }) {
           open={Boolean(notifAnchorEl)}
           onClose={handleNotifClose}
           PaperProps={{
-            sx: { width: 320, maxHeight: 400 },
+            sx: { width: 340, maxHeight: 420 },
           }}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
-          <Box sx={{ px: 2, py: 1 }}>
-            <Typography variant="subtitle1" fontWeight={600}>
+          <Box sx={{ px: 2.5, py: 1.5 }}>
+            <Typography variant="subtitle1" fontWeight={700}>
               Notifications
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              You have 3 unread messages
             </Typography>
           </Box>
           <Divider />
 
-          <MenuItem onClick={handleNotifClose}>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
-                Request Approved
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Your revaluation request for CS301 has been approved.
-              </Typography>
-            </Box>
-          </MenuItem>
-
-          <MenuItem onClick={handleNotifClose}>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
-                New Document Uploaded
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Response sheet for CS302 is now available.
-              </Typography>
-            </Box>
-          </MenuItem>
-
-          <MenuItem onClick={handleNotifClose}>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
-                Marks Updated
-              </Typography>
-              <Typography variant="caption" color="text.secondary">
-                Your marks for CS303 have been updated.
-              </Typography>
-            </Box>
-          </MenuItem>
+          {[
+            {
+              title: 'Request Approved',
+              description: 'Your revaluation request for CS301 has been approved.',
+              time: '2 min ago',
+              color: '#22c55e',
+            },
+            {
+              title: 'New Document Uploaded',
+              description: 'Response sheet for CS302 is now available.',
+              time: '1 hour ago',
+              color: '#0ea5e9',
+            },
+            {
+              title: 'Marks Updated',
+              description: 'Your marks for CS303 have been updated.',
+              time: '3 hours ago',
+              color: '#f59e0b',
+            },
+          ].map((notif, i) => (
+            <MenuItem
+              key={i}
+              onClick={handleNotifClose}
+              sx={{ py: 1.5, px: 2 }}
+            >
+              <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', width: '100%' }}>
+                <Box sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  backgroundColor: notif.color,
+                  mt: 0.8,
+                  flexShrink: 0,
+                }} />
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                    <Typography variant="body2" fontWeight={600}>
+                      {notif.title}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: 1, flexShrink: 0 }}>
+                      {notif.time}
+                    </Typography>
+                  </Box>
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.3 }}>
+                    {notif.description}
+                  </Typography>
+                </Box>
+              </Box>
+            </MenuItem>
+          ))}
 
           <Divider />
           <MenuItem
             onClick={handleNotifClose}
-            sx={{ justifyContent: 'center', color: 'primary.main' }}
+            sx={{ justifyContent: 'center', color: 'primary.main', fontWeight: 600, py: 1.5 }}
           >
             View all notifications
           </MenuItem>
         </Menu>
 
         {/* User Menu */}
-        <IconButton onClick={handleMenuOpen} sx={{ p: 0.5 }}>
-          <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+        <Box
+          onClick={handleMenuOpen}
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            cursor: 'pointer',
+            py: 0.5,
+            px: 1,
+            borderRadius: 2.5,
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              backgroundColor: 'rgba(240, 253, 250, 0.6)',
+            },
+          }}
+        >
+          <Avatar
+            sx={{
+              width: 34,
+              height: 34,
+              bgcolor: 'primary.main',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              boxShadow: '0 2px 8px rgba(15, 118, 110, 0.25)',
+            }}
+          >
             {user?.name.charAt(0).toUpperCase()}
           </Avatar>
-          <Typography
-            variant="body2"
-            fontWeight={500}
-            sx={{ ml: 1, display: { xs: 'none', md: 'block' } }}
-          >
-            {user?.name}
-          </Typography>
-        </IconButton>
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              sx={{ lineHeight: 1.2 }}
+            >
+              {user?.name}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+              {user?.role === 'admin' ? 'Administrator' : 'Student'}
+            </Typography>
+          </Box>
+        </Box>
 
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
-          <Box sx={{ px: 2, py: 1 }}>
-            <Typography variant="subtitle2" fontWeight={600}>
+          <Box sx={{ px: 2.5, py: 1.5 }}>
+            <Typography variant="subtitle2" fontWeight={700}>
               My Account
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {user?.email}
             </Typography>
           </Box>
           <Divider />

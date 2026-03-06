@@ -28,7 +28,12 @@ import {
   CircularProgress,
   Grid,
 } from '@mui/material';
-import { Info as InfoIcon, CheckCircle as CheckIcon } from '@mui/icons-material';
+import {
+  Info as InfoIcon,
+  CheckCircle as CheckIcon,
+  RateReview as ReviewIcon,
+  Grading as GradingIcon,
+} from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 
 const formSchema = z.object({
@@ -65,6 +70,7 @@ export default function ApplyForm({ type }) {
   const description = isReview
     ? 'Request to view your answer sheet for a particular subject'
     : 'Request re-evaluation of your answer sheet by an expert';
+  const HeaderIcon = isReview ? ReviewIcon : GradingIcon;
 
   useEffect(() => {
     if (!user?.id) {
@@ -156,25 +162,43 @@ export default function ApplyForm({ type }) {
 
   return (
     <Box sx={{ maxWidth: 700, mx: 'auto', width: '100%', px: { xs: 0, sm: 1 } }}>
-      <Box sx={{ mb: { xs: 2, sm: 3 } }}>
-        <Typography
-          variant="h5"
-          fontWeight={700}
-          sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' } }}
-        >
-          {title}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {description}
-        </Typography>
+      <Box sx={{ mb: { xs: 2, sm: 3 }, display: 'flex', alignItems: 'center', gap: 2 }} className="animate-fade-in-up">
+        <Box sx={{
+          width: 48,
+          height: 48,
+          borderRadius: 3,
+          background: isReview
+            ? 'linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%)'
+            : 'linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: isReview
+            ? '0 6px 16px -4px rgba(14, 165, 233, 0.3)'
+            : '0 6px 16px -4px rgba(139, 92, 246, 0.3)',
+        }}>
+          <HeaderIcon sx={{ color: 'white', fontSize: 24 }} />
+        </Box>
+        <Box>
+          <Typography
+            variant="h5"
+            fontWeight={800}
+            sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' }, letterSpacing: '-0.02em' }}
+          >
+            {title}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {description}
+          </Typography>
+        </Box>
       </Box>
 
       {/* Info Card */}
-      <Alert severity="info" icon={<InfoIcon />} sx={{ mb: 3 }}>
-        <Typography variant="body2" fontWeight={500}>
+      <Alert severity="info" icon={<InfoIcon />} sx={{ mb: 3 }} className="animate-fade-in-up animate-stagger-1">
+        <Typography variant="body2" fontWeight={600}>
           Important Information
         </Typography>
-        <Box component="ul" sx={{ m: 0, pl: 2, mt: 1 }}>
+        <Box component="ul" sx={{ m: 0, pl: 2, mt: 1, '& li': { mb: 0.5 } }}>
           {isReview ? (
             <>
               <li>Review fee: ₹500 per subject (non-refundable)</li>
@@ -193,7 +217,7 @@ export default function ApplyForm({ type }) {
       </Alert>
 
       {/* Form */}
-      <Card>
+      <Card className="animate-fade-in-up animate-stagger-2">
         <CardHeader
           title="Request Details"
           subheader={`Fill in the details below to submit your ${type} request`}
@@ -233,40 +257,31 @@ export default function ApplyForm({ type }) {
             {selectedSubject && (
               <Box
                 sx={{
-                  bgcolor: 'grey.50',
-                  p: 2,
-                  borderRadius: 2,
+                  background: 'linear-gradient(135deg, rgba(240, 253, 250, 0.8) 0%, rgba(204, 251, 241, 0.3) 100%)',
+                  p: 2.5,
+                  borderRadius: 3,
                   mb: 3,
+                  border: '1px solid rgba(204, 251, 241, 0.5)',
                 }}
               >
-                <Typography variant="body2" fontWeight={500} gutterBottom>
+                <Typography variant="body2" fontWeight={600} gutterBottom>
                   Current Marks
                 </Typography>
                 <Grid container spacing={2}>
-                  <Grid item xs={4}>
-                    <Typography variant="caption" color="text.secondary">
-                      Internal:
-                    </Typography>
-                    <Typography variant="body2" fontWeight={500}>
-                      {selectedSubject.internalMarks}/40
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Typography variant="caption" color="text.secondary">
-                      External:
-                    </Typography>
-                    <Typography variant="body2" fontWeight={500}>
-                      {selectedSubject.externalMarks}/60
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Typography variant="caption" color="text.secondary">
-                      Total:
-                    </Typography>
-                    <Typography variant="body2" fontWeight={500}>
-                      {selectedSubject.totalMarks}/100
-                    </Typography>
-                  </Grid>
+                  {[
+                    { label: 'Internal:', value: `${selectedSubject.internalMarks}/40` },
+                    { label: 'External:', value: `${selectedSubject.externalMarks}/60` },
+                    { label: 'Total:', value: `${selectedSubject.totalMarks}/100` },
+                  ].map((item) => (
+                    <Grid item xs={4} key={item.label}>
+                      <Typography variant="caption" color="text.secondary">
+                        {item.label}
+                      </Typography>
+                      <Typography variant="body2" fontWeight={700}>
+                        {item.value}
+                      </Typography>
+                    </Grid>
+                  ))}
                 </Grid>
               </Box>
             )}
@@ -297,6 +312,7 @@ export default function ApplyForm({ type }) {
                 variant="outlined"
                 onClick={() => navigate(-1)}
                 disabled={isSubmitting}
+                sx={{ px: 3 }}
               >
                 Cancel
               </Button>
@@ -311,6 +327,13 @@ export default function ApplyForm({ type }) {
                     <CheckIcon />
                   )
                 }
+                sx={{
+                  px: 3,
+                  background: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #0d5c56 0%, #0f766e 100%)',
+                  },
+                }}
               >
                 {isSubmitting ? 'Submitting...' : 'Submit Request'}
               </Button>

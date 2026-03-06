@@ -82,7 +82,7 @@ export default function ViewMarksPage() {
   }, [user?.id]);
 
   if (!user) {
-    return null; // or redirect; AuthProvider handles loading
+    return null;
   }
 
   if (isLoading) {
@@ -98,15 +98,21 @@ export default function ViewMarksPage() {
   const sgpa =
     totalCredits > 0 ? (weightedSum / totalCredits / 10).toFixed(2) : '0.00';
 
+  const summaryCards = [
+    { label: 'Total Subjects', value: marks.length, gradient: 'linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%)', color: '#0f766e' },
+    { label: 'Total Credits', value: totalCredits, gradient: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: '#2563eb' },
+    { label: 'SGPA', value: sgpa, gradient: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)', color: '#16a34a' },
+  ];
+
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
-      <Box sx={{ mb: { xs: 2, sm: 3 } }}>
+      <Box sx={{ mb: { xs: 2, sm: 3 } }} className="animate-fade-in-up">
         <Typography
           variant="h5"
-          fontWeight={700}
-          sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' } }}
+          fontWeight={800}
+          sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' }, letterSpacing: '-0.02em' }}
         >
-          View Marks
+          View Marks 📊
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Your academic performance for the current semester
@@ -121,54 +127,47 @@ export default function ViewMarksPage() {
 
       {/* Summary Cards */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
-                Total Subjects
-              </Typography>
-              <Typography variant="h4" fontWeight={700}>
-                {marks.length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
-                Total Credits
-              </Typography>
-              <Typography variant="h4" fontWeight={700}>
-                {totalCredits}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid item xs={12} sm={4}>
-          <Card>
-            <CardContent sx={{ textAlign: 'center' }}>
-              <Typography variant="body2" color="text.secondary">
-                SGPA
-              </Typography>
-              <Typography variant="h4" fontWeight={700} color="primary">
-                {sgpa}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
+        {summaryCards.map((card, i) => (
+          <Grid item xs={12} sm={4} key={card.label}>
+            <Card
+              className={`animate-fade-in-up animate-stagger-${i + 1}`}
+              sx={{
+                background: card.gradient,
+                border: 'none',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                },
+              }}
+            >
+              <CardContent sx={{ textAlign: 'center', py: 3 }}>
+                <Typography variant="body2" sx={{ color: card.color, fontWeight: 600, opacity: 0.8 }}>
+                  {card.label}
+                </Typography>
+                <Typography variant="h3" fontWeight={800} sx={{ color: card.color, letterSpacing: '-0.02em' }}>
+                  {card.value}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
       </Grid>
 
       {/* Marks Table */}
-      <Card sx={{ mb: 3 }}>
+      <Card sx={{ mb: 3 }} className="animate-fade-in-up animate-stagger-4">
         <CardHeader
           title="Semester 3 - 2024-25"
           titleTypographyProps={{ variant: 'h6' }}
         />
         <CardContent>
-          <TableContainer component={Paper} variant="outlined" sx={{ overflowX: 'auto' }}>
+          <TableContainer
+            component={Paper}
+            variant="outlined"
+            sx={{
+              overflowX: 'auto',
+              borderRadius: 3,
+              border: '1px solid rgba(204, 251, 241, 0.5)',
+            }}
+          >
             <Table sx={{ minWidth: { xs: 400, sm: 'auto' } }}>
               <TableHead>
                 <TableRow>
@@ -183,12 +182,18 @@ export default function ViewMarksPage() {
               </TableHead>
 
               <TableBody>
-                {marks.map((mark) => {
+                {marks.map((mark, idx) => {
                   const subj = subjectRef(mark);
                   return (
-                    <TableRow key={mark._id || mark.id} hover>
+                    <TableRow
+                      key={mark._id || mark.id}
+                      hover
+                      sx={{
+                        backgroundColor: idx % 2 === 0 ? 'transparent' : 'rgba(240, 253, 250, 0.3)',
+                      }}
+                    >
                       <TableCell>
-                        <Typography fontWeight={500}>
+                        <Typography fontWeight={600} sx={{ fontSize: '0.85rem' }}>
                           {subj.code ?? '—'}
                         </Typography>
                       </TableCell>
@@ -203,7 +208,7 @@ export default function ViewMarksPage() {
                         {mark.externalMarks ?? '—'}
                       </TableCell>
                       <TableCell align="center">
-                        <Typography fontWeight={500}>
+                        <Typography fontWeight={700}>
                           {mark.totalMarks ?? '—'}
                         </Typography>
                       </TableCell>
@@ -212,7 +217,7 @@ export default function ViewMarksPage() {
                           label={mark.grade ?? '—'}
                           color={getGradeColor(mark.grade)}
                           size="small"
-                          sx={{ fontWeight: 600 }}
+                          sx={{ fontWeight: 700, minWidth: 40 }}
                         />
                       </TableCell>
                     </TableRow>
@@ -225,7 +230,7 @@ export default function ViewMarksPage() {
       </Card>
 
       {/* Grade Scale Reference */}
-      <Card>
+      <Card className="animate-fade-in-up animate-stagger-5">
         <CardHeader
           title="Grade Scale Reference"
           titleTypographyProps={{ variant: 'h6' }}
@@ -250,17 +255,22 @@ export default function ViewMarksPage() {
                   px: 2,
                   py: 1,
                   border: '1px solid',
-                  borderColor: 'divider',
-                  borderRadius: 2,
+                  borderColor: 'rgba(204, 251, 241, 0.5)',
+                  borderRadius: 2.5,
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: 'primary.light',
+                    transform: 'translateY(-1px)',
+                  },
                 }}
               >
                 <Chip
                   label={item.grade}
                   color={getGradeColor(item.grade)}
                   size="small"
-                  sx={{ fontWeight: 600 }}
+                  sx={{ fontWeight: 700 }}
                 />
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" fontWeight={500}>
                   {item.range}
                 </Typography>
               </Box>

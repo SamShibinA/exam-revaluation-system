@@ -73,6 +73,7 @@ export default function StudentRequestsPage() {
   return (
     <Box sx={{ width: '100%', overflow: 'hidden' }}>
       <Box
+        className="animate-fade-in-up"
         sx={{
           display: 'flex',
           flexDirection: { xs: 'column', sm: 'row' },
@@ -84,8 +85,8 @@ export default function StudentRequestsPage() {
         }}
       >
         <Box>
-          <Typography variant="h5" fontWeight={700}>
-            My Requests
+          <Typography variant="h5" fontWeight={800} sx={{ letterSpacing: '-0.02em' }}>
+            My Requests 📝
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Track the status of your review and revaluation requests
@@ -95,23 +96,33 @@ export default function StudentRequestsPage() {
           <Button component={Link} to="/student/apply-review" variant="outlined">
             Apply for Review
           </Button>
-          <Button component={Link} to="/student/apply-revaluation" variant="contained">
+          <Button
+            component={Link}
+            to="/student/apply-revaluation"
+            variant="contained"
+            sx={{
+              background: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #0d5c56 0%, #0f766e 100%)',
+              },
+            }}
+          >
             Apply for Revaluation
           </Button>
         </Box>
       </Box>
 
       {requests.length === 0 ? (
-        <Card>
+        <Card className="animate-fade-in-up animate-stagger-1">
           <CardContent sx={{ textAlign: 'center', py: 8 }}>
-            <ClipboardIcon sx={{ fontSize: 64, color: 'grey.300' }} />
-            <Typography variant="h6" sx={{ mt: 2 }}>
+            <Typography variant="h2" sx={{ opacity: 0.1, mb: 1 }}>📋</Typography>
+            <Typography variant="h6" sx={{ mt: 1 }} fontWeight={600}>
               No requests yet
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 3 }}>
               You haven't submitted any review or revaluation requests
             </Typography>
-            <Box sx={{ mt: 3, display: 'flex', gap: 1, justifyContent: 'center' }}>
+            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
               <Button component={Link} to="/student/apply-review" variant="outlined">
                 Apply for Review
               </Button>
@@ -122,20 +133,30 @@ export default function StudentRequestsPage() {
           </CardContent>
         </Card>
       ) : (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {requests.map((request) => (
-            <Card key={request.id || request._id}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
+          {requests.map((request, idx) => (
+            <Card
+              key={request.id || request._id}
+              className={`animate-fade-in-up animate-stagger-${Math.min(idx + 1, 6)}`}
+              sx={{
+                borderLeft: '4px solid',
+                borderLeftColor: request.status === 'approved' ? 'success.main'
+                  : request.status === 'rejected' ? 'error.main'
+                    : request.status === 'pending' ? 'warning.main'
+                      : 'primary.main',
+              }}
+            >
               <CardHeader
                 title={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="h6">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+                    <Typography variant="h6" fontWeight={700}>
                       {request.subject.code} - {request.subject.name}
                     </Typography>
                     <Chip
                       label={request.requestType}
                       size="small"
                       variant="outlined"
-                      sx={{ textTransform: 'capitalize' }}
+                      sx={{ textTransform: 'capitalize', fontWeight: 600 }}
                     />
                   </Box>
                 }
@@ -153,12 +174,14 @@ export default function StudentRequestsPage() {
                 <Accordion
                   sx={{
                     boxShadow: 'none',
-                    bgcolor: 'grey.50',
+                    background: 'linear-gradient(135deg, rgba(240, 253, 250, 0.6) 0%, rgba(204, 251, 241, 0.2) 100%)',
+                    borderRadius: '12px !important',
+                    border: '1px solid rgba(204, 251, 241, 0.4)',
                     '&:before': { display: 'none' },
                   }}
                 >
                   <AccordionSummary expandIcon={<ExpandIcon />}>
-                    <Typography variant="body2" fontWeight={500}>
+                    <Typography variant="body2" fontWeight={600}>
                       View Details
                     </Typography>
                   </AccordionSummary>
@@ -168,7 +191,7 @@ export default function StudentRequestsPage() {
                         <Typography variant="caption" color="text.secondary">
                           Current Marks
                         </Typography>
-                        <Typography variant="h6">
+                        <Typography variant="h6" fontWeight={700}>
                           {request.currentMarks}/100
                         </Typography>
                       </Box>
@@ -178,13 +201,13 @@ export default function StudentRequestsPage() {
                           <Typography variant="caption" color="text.secondary">
                             Updated Marks
                           </Typography>
-                          <Typography variant="h6" color="success.main">
+                          <Typography variant="h6" color="success.main" fontWeight={700}>
                             {request.updatedMarks}/100
                             {request.updatedMarks > request.currentMarks && (
                               <Typography
                                 component="span"
                                 variant="body2"
-                                sx={{ ml: 1 }}
+                                sx={{ ml: 1, color: 'success.main', fontWeight: 600 }}
                               >
                                 (+{request.updatedMarks - request.currentMarks})
                               </Typography>
@@ -204,13 +227,14 @@ export default function StudentRequestsPage() {
                     {request.adminRemarks && (
                       <Box
                         sx={{
-                          bgcolor: 'background.paper',
+                          bgcolor: 'rgba(255,255,255,0.8)',
                           p: 2,
-                          borderRadius: 1,
+                          borderRadius: 2.5,
                           mb: 2,
+                          border: '1px solid rgba(204, 251, 241, 0.5)',
                         }}
                       >
-                        <Typography variant="body2" fontWeight={500}>
+                        <Typography variant="body2" fontWeight={600}>
                           Admin Remarks
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -221,13 +245,16 @@ export default function StudentRequestsPage() {
 
                     {request.responseSheet && (
                       <Button
+                        component={Link}
+                        to="/student/view-document"
+                        state={{
+                          documentUrl: request.responseSheet,
+                          subjectName: request.subject?.name,
+                          requestId: request._id || request.id
+                        }}
                         variant="outlined"
                         size="small"
                         startIcon={<FileIcon />}
-                        endIcon={<ExternalLinkIcon />}
-                        href={request.responseSheet}
-                        target="_blank"
-                        rel="noopener noreferrer"
                       >
                         View Response Sheet
                       </Button>

@@ -8,10 +8,11 @@ const RequestSchema = new mongoose.Schema({
   currentMarks: Number,
   updatedMarks: Number,
   adminRemarks: String,
-  status: { 
-    type: String, 
+  responseSheet: String,
+  status: {
+    type: String,
     enum: ["pending", "in_review", "approved", "rejected", "completed"],
-    default: "pending" 
+    default: "pending"
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: Date,

@@ -24,7 +24,7 @@ export function RequestTimeline({ currentStatus }) {
   const isRejected = currentStatus === 'rejected';
 
   return (
-    <Box sx={{ width: '100%' }}>
+    <Box sx={{ width: '100%', py: 1 }}>
       <Box
         sx={{
           display: 'flex',
@@ -39,10 +39,10 @@ export function RequestTimeline({ currentStatus }) {
           const showRejected = isRejected && index === 2;
 
           const getBgColor = () => {
-            if (isCompleted) return 'success.main';
-            if (isCurrent && !showRejected) return 'primary.main';
-            if (showRejected) return 'error.main';
-            return 'grey.200';
+            if (isCompleted) return 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)';
+            if (isCurrent && !showRejected) return 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)';
+            if (showRejected) return 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+            return 'linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%)';
           };
 
           const getTextColor = () => {
@@ -68,27 +68,27 @@ export function RequestTimeline({ currentStatus }) {
                     width: 40,
                     height: 40,
                     borderRadius: '50%',
-                    bgcolor: getBgColor(),
+                    background: getBgColor(),
                     color:
                       isCompleted || isCurrent || showRejected
                         ? 'white'
-                        : 'grey.500',
+                        : '#9ca3af',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    border: '2px solid',
-                    borderColor:
-                      isCompleted || isCurrent || showRejected
-                        ? 'transparent'
-                        : 'grey.300',
+                    boxShadow: (isCompleted || isCurrent || showRejected)
+                      ? '0 4px 12px -4px rgba(0,0,0,0.2)'
+                      : 'none',
+                    transition: 'all 0.3s ease',
+                    animation: isCurrent ? 'pulseRing 2s infinite' : 'none',
                   }}
                 >
-                  {showRejected ? <CloseIcon /> : <Icon />}
+                  {showRejected ? <CloseIcon sx={{ fontSize: 18 }} /> : <Icon sx={{ fontSize: 18 }} />}
                 </Box>
                 <Typography
                   variant="caption"
-                  fontWeight={500}
-                  sx={{ mt: 1, color: getTextColor() }}
+                  fontWeight={isCurrent || isCompleted ? 600 : 500}
+                  sx={{ mt: 1, color: getTextColor(), fontSize: '0.68rem' }}
                 >
                   {showRejected ? 'Rejected' : step.label}
                 </Typography>
@@ -98,12 +98,14 @@ export function RequestTimeline({ currentStatus }) {
                 <Box
                   sx={{
                     flex: 1,
-                    height: 2,
+                    height: 3,
                     mx: 1,
-                    bgcolor:
+                    borderRadius: 2,
+                    background:
                       index < currentIndex
-                        ? 'success.main'
-                        : 'grey.200',
+                        ? 'linear-gradient(90deg, #22c55e 0%, #16a34a 100%)'
+                        : '#e5e7eb',
+                    transition: 'all 0.5s ease',
                   }}
                 />
               )}
