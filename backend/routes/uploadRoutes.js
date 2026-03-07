@@ -55,8 +55,49 @@ router.post(
 );
 
 router.get("/uploads", authMiddleware, async (req, res) => {
-  const uploads = await Upload.find().sort({ createdAt: -1 }).limit(10);
-  res.json(uploads);
+  try {
+    let { page = 1, limit = 10 } = req.query;
+    page = Number(page);
+    limit = Number(limit);
+
+    // If limit is 0 or very large, treat as "All"
+    const isAll = limit <= 0;
+
+    let query = Upload.find().sort({ createdAt: -1 });
+
+    if (!isAll) {
+      query = query.skip((page - 1) * limit).limit(limit);
+    }
+
+    const uploads = await query;
+    const total = await Upload.countDocuments();
+
+    res.json({
+      data: uploads,
+      total,
+      page,
+      limit: isAll ? total : limit,
+      totalPages: isAll ? 1 : Math.ceil(total / limit),
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch uploads" });
+  }
+});
+
+router.delete("/uploads/:id", authMiddleware, async (req, res) => {
+  try {
+    const upload = await Upload.findById(req.params.id);
+    if (!upload) {
+      return res.status(404).json({ message: "Upload not found" });
+    }
+
+    // Optionally you could use fs.unlinkSync to delete the physical file
+    await Upload.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "Upload deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete upload" });
+  }
 });
 
 export default router;
