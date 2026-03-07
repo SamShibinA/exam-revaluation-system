@@ -31,7 +31,7 @@ export function DashboardLayout({ title }) {
         }}
       >
         <Navbar title={title} onMenuClick={handleDrawerToggle} />
-        <Box component="main" sx={{ flex: 1, p: { xs: 2, sm: 3 }, width: '100%', overflow: 'auto' }}>
+        <Box component="main" sx={{ flex: 1, p: { xs: 1, sm: 3 }, width: '100%', overflow: 'auto' }}>
           <Outlet />
         </Box>
       </Box>

@@ -74,7 +74,7 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+    <Box sx={{ width: '100%', overflow: 'hidden', px: { xs: 1, sm: 0 } }}>
       {/* Header */}
       <Box
         className="animate-fade-in-up"
@@ -84,10 +84,10 @@ export default function AdminDashboard() {
           justifyContent: 'space-between',
           alignItems: { xs: 'stretch', sm: 'center' },
           gap: 2,
-          mb: { xs: 2, sm: 3 },
-          p: { xs: 2.5, sm: 3.5 },
+          mb: { xs: 2.5, sm: 3.5 },
+          p: { xs: 2, sm: 3.5 },
           background: 'linear-gradient(135deg, #0a5f58 0%, #0f766e 40%, #14b8a6 100%)',
-          borderRadius: { xs: 3, sm: 4 },
+          borderRadius: { xs: 2.5, sm: 4 },
           color: 'white',
           position: 'relative',
           overflow: 'hidden',
@@ -103,10 +103,10 @@ export default function AdminDashboard() {
           pointerEvents: 'none',
         }} />
         <Box sx={{ position: 'relative' }}>
-          <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: '1.2rem', sm: '1.6rem' }, letterSpacing: '-0.02em' }}>
+          <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: '1.1rem', sm: '1.6rem' }, letterSpacing: '-0.02em' }}>
             Admin Dashboard 🛡️
           </Typography>
-          <Typography variant="body2" sx={{ opacity: 0.85 }}>
+          <Typography variant="body2" sx={{ opacity: 0.85, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
             Overview of exam revaluation system
           </Typography>
         </Box>
@@ -122,6 +122,8 @@ export default function AdminDashboard() {
             color: 'white',
             border: '1px solid rgba(255,255,255,0.25)',
             position: 'relative',
+            fontSize: { xs: '0.8rem', sm: '0.875rem' },
+            py: { xs: 1, sm: 1 },
             '&:hover': {
               bgcolor: 'rgba(255,255,255,0.3)',
               boxShadow: '0 4px 16px rgba(0,0,0,0.15)',

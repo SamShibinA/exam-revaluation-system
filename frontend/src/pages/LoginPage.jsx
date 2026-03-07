@@ -143,29 +143,29 @@ export default function LoginPage() {
           boxShadow: '0 20px 60px -15px rgba(15, 118, 110, 0.15), 0 8px 20px -10px rgba(15, 118, 110, 0.1)',
         }}
       >
-        <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+        <CardContent sx={{ p: { xs: 3, sm: 5 } }}>
           {/* Header */}
-          <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 4 } }}>
+          <Box sx={{ textAlign: 'center', mb: { xs: 3.5, sm: 5 } }}>
             <Box
               sx={{
-                width: { xs: 52, sm: 60 },
-                height: { xs: 52, sm: 60 },
-                borderRadius: 3,
+                width: { xs: 48, sm: 64 },
+                height: { xs: 48, sm: 64 },
+                borderRadius: 3.5,
                 background: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                mb: 2,
+                mb: 2.5,
                 boxShadow: '0 8px 24px -6px rgba(15, 118, 110, 0.4)',
                 animation: 'float 4s ease-in-out infinite',
               }}
             >
-              <SchoolIcon sx={{ fontSize: { xs: 26, sm: 30 }, color: 'white' }} />
+              <SchoolIcon sx={{ fontSize: { xs: 24, sm: 32 }, color: 'white' }} />
             </Box>
-            <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: '1.3rem', sm: '1.5rem' }, letterSpacing: '-0.02em' }}>
+            <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: '1.25rem', sm: '1.75rem' }, letterSpacing: '-0.02em' }}>
               Welcome Back
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.8, fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>
               Sign in to your Exam Revaluation Portal
             </Typography>
           </Box>

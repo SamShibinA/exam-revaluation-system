@@ -71,36 +71,49 @@ export default function StudentRequestsPage() {
   }
 
   return (
-    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+    <Box sx={{ width: '100%', overflow: 'hidden', px: { xs: 1, sm: 0 } }}>
       <Box
         className="animate-fade-in-up"
         sx={{
           display: 'flex',
           flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between',
-          alignItems: { xs: 'stretch', sm: 'center' },
-          mb: { xs: 2, sm: 3 },
-          flexWrap: 'wrap',
-          gap: 2,
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          mb: { xs: 2.5, sm: 3.5 },
+          gap: { xs: 1.5, sm: 2 },
         }}
       >
         <Box>
-          <Typography variant="h5" fontWeight={800} sx={{ letterSpacing: '-0.02em' }}>
+          <Typography
+            variant="h5"
+            fontWeight={800}
+            sx={{ fontSize: { xs: '1.25rem', sm: '1.5rem' }, letterSpacing: '-0.02em' }}
+          >
             My Requests 📝
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
             Track the status of your review and revaluation requests
           </Typography>
         </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button component={Link} to="/student/apply-review" variant="outlined">
+        <Box sx={{ display: 'flex', gap: 1, width: { xs: '100%', sm: 'auto' } }}>
+          <Button
+            component={Link}
+            to="/student/apply-review"
+            variant="outlined"
+            fullWidth={false}
+            sx={{ flex: { xs: 1, sm: 'none' }, py: { xs: 1, sm: 1.2 }, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+          >
             Apply for Review
           </Button>
           <Button
             component={Link}
             to="/student/apply-revaluation"
             variant="contained"
+            fullWidth={false}
             sx={{
+              flex: { xs: 1, sm: 'none' },
+              py: { xs: 1, sm: 1.2 },
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
               background: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
               '&:hover': {
                 background: 'linear-gradient(135deg, #0d5c56 0%, #0f766e 100%)',
@@ -147,23 +160,41 @@ export default function StudentRequestsPage() {
               }}
             >
               <CardHeader
+                sx={{
+                  p: { xs: 2, sm: 3 },
+                  pb: 1,
+                  display: 'flex',
+                  flexDirection: { xs: 'column', sm: 'row' },
+                  alignItems: { xs: 'flex-start', sm: 'center' },
+                  '& .MuiCardHeader-content': { width: '100%' },
+                  '& .MuiCardHeader-action': {
+                    alignSelf: { xs: 'flex-start', sm: 'center' },
+                    m: 0,
+                    mt: { xs: 1.5, sm: 0 },
+                    ml: { xs: 0, sm: 'auto' }
+                  }
+                }}
                 title={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-                    <Typography variant="h6" fontWeight={700}>
+                    <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                       {request.subject.code} - {request.subject.name}
                     </Typography>
                     <Chip
                       label={request.requestType}
                       size="small"
                       variant="outlined"
-                      sx={{ textTransform: 'capitalize', fontWeight: 600 }}
+                      sx={{ textTransform: 'capitalize', fontWeight: 600, fontSize: '0.7rem' }}
                     />
                   </Box>
                 }
-                subheader={`Request ID: ${request.id || request._id} • Submitted on ${format(
-                  new Date(request.createdAt),
-                  'MMM dd, yyyy'
-                )}`}
+                subheader={
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5, fontSize: { xs: '0.65rem', sm: '0.75rem' } }}>
+                    Request ID: {request.id || request._id} • Submitted on {format(
+                      new Date(request.createdAt),
+                      'MMM dd, yyyy'
+                    )}
+                  </Typography>
+                }
                 action={<StatusBadge status={request.status} />}
               />
               <CardContent>
@@ -185,29 +216,29 @@ export default function StudentRequestsPage() {
                       View Details
                     </Typography>
                   </AccordionSummary>
-                  <AccordionDetails>
-                    <Box sx={{ display: 'flex', gap: 4, mb: 2, flexWrap: 'wrap' }}>
+                  <AccordionDetails sx={{ p: { xs: 2, sm: 3 } }}>
+                    <Box sx={{ display: 'flex', gap: { xs: 2, sm: 4 }, mb: 2.5, flexWrap: 'wrap' }}>
                       <Box>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
                           Current Marks
                         </Typography>
-                        <Typography variant="h6" fontWeight={700}>
+                        <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                           {request.currentMarks}/100
                         </Typography>
                       </Box>
 
                       {request.updatedMarks !== undefined && (
                         <Box>
-                          <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
                             Updated Marks
                           </Typography>
-                          <Typography variant="h6" color="success.main" fontWeight={700}>
+                          <Typography variant="h6" color="success.main" fontWeight={700} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                             {request.updatedMarks}/100
                             {request.updatedMarks > request.currentMarks && (
                               <Typography
                                 component="span"
                                 variant="body2"
-                                sx={{ ml: 1, color: 'success.main', fontWeight: 600 }}
+                                sx={{ ml: 1, color: 'success.main', fontWeight: 600, fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
                               >
                                 (+{request.updatedMarks - request.currentMarks})
                               </Typography>
@@ -217,11 +248,11 @@ export default function StudentRequestsPage() {
                       )}
                     </Box>
 
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="caption" color="text.secondary">
+                    <Box sx={{ mb: 2.5 }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
                         Your Reason
                       </Typography>
-                      <Typography variant="body2">{request.reason}</Typography>
+                      <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}>{request.reason}</Typography>
                     </Box>
 
                     {request.adminRemarks && (
@@ -230,14 +261,14 @@ export default function StudentRequestsPage() {
                           bgcolor: 'rgba(255,255,255,0.8)',
                           p: 2,
                           borderRadius: 2.5,
-                          mb: 2,
+                          mb: 2.5,
                           border: '1px solid rgba(204, 251, 241, 0.5)',
                         }}
                       >
-                        <Typography variant="body2" fontWeight={600}>
+                        <Typography variant="body2" fontWeight={600} sx={{ fontSize: '0.85rem' }}>
                           Admin Remarks
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
                           {request.adminRemarks}
                         </Typography>
                       </Box>
@@ -253,8 +284,10 @@ export default function StudentRequestsPage() {
                           requestId: request._id || request.id
                         }}
                         variant="outlined"
-                        size="small"
+                        size="medium"
+                        fullWidth={true}
                         startIcon={<FileIcon />}
+                        sx={{ borderRadius: 2, textTransform: 'none', py: 1 }}
                       >
                         View Response Sheet
                       </Button>

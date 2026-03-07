@@ -161,8 +161,17 @@ export default function UploadDocumentPage() {
   };
 
   return (
-    <Box sx={{ maxWidth: 900, mx: "auto", width: "100%", px: { xs: 0, sm: 1 } }}>
-      <Box sx={{ mb: { xs: 2, sm: 3 }, display: 'flex', alignItems: 'center', gap: 2 }} className="animate-fade-in-up">
+    <Box sx={{ maxWidth: 900, mx: "auto", width: "100%", px: { xs: 1, sm: 2 } }}>
+      <Box
+        sx={{
+          mb: { xs: 2.5, sm: 3.5 },
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: { xs: 1.5, sm: 2 }
+        }}
+        className="animate-fade-in-up"
+      >
         <Box sx={{
           width: 48,
           height: 48,
@@ -191,7 +200,7 @@ export default function UploadDocumentPage() {
           subheader="Select a request and document file to upload"
           titleTypographyProps={{ variant: "h6" }}
         />
-        <CardContent>
+        <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2} sx={{ mb: 3 }}>
               <Grid item xs={12}>
@@ -247,8 +256,8 @@ export default function UploadDocumentPage() {
       {/* Uploaded Documents List */}
       <Card className="animate-fade-in-up animate-stagger-2">
         <CardHeader title="Uploaded Documents" titleTypographyProps={{ variant: "h6" }} />
-        <CardContent>
-          <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2 }}>
+        <CardContent sx={{ p: { xs: 1.5, sm: 3 } }}>
+          <TableContainer component={Paper} elevation={0} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, width: '100%', overflowX: 'auto' }}>
             <Table sx={{ minWidth: 650 }} aria-label="uploaded documents table">
               <TableHead sx={{ bgcolor: "background.default" }}>
                 <TableRow>

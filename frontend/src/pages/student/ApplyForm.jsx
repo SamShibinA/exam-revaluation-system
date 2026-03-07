@@ -169,8 +169,17 @@ export default function ApplyForm({ type }) {
   }
 
   return (
-    <Box sx={{ maxWidth: 700, mx: 'auto', width: '100%', px: { xs: 0, sm: 1 } }}>
-      <Box sx={{ mb: { xs: 2, sm: 3 }, display: 'flex', alignItems: 'center', gap: 2 }} className="animate-fade-in-up">
+    <Box sx={{ maxWidth: 700, mx: 'auto', width: '100%', px: { xs: 1, sm: 2 } }}>
+      <Box
+        sx={{
+          mb: { xs: 2.5, sm: 3.5 },
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: { xs: 1.5, sm: 2 }
+        }}
+        className="animate-fade-in-up"
+      >
         <Box sx={{
           width: 48,
           height: 48,
@@ -231,7 +240,7 @@ export default function ApplyForm({ type }) {
           subheader={`Fill in the details below to submit your ${type} request`}
           titleTypographyProps={{ variant: 'h6' }}
         />
-        <CardContent>
+        <CardContent sx={{ p: { xs: 2.5, sm: 4 } }}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <Controller
               name="subjectId"
@@ -275,17 +284,17 @@ export default function ApplyForm({ type }) {
                 <Typography variant="body2" fontWeight={600} gutterBottom>
                   Current Marks
                 </Typography>
-                <Grid container spacing={2}>
+                <Grid container spacing={1.5}>
                   {[
                     { label: 'Internal:', value: `${selectedSubject.internalMarks}/40` },
                     { label: 'External:', value: `${selectedSubject.externalMarks}/60` },
                     { label: 'Total:', value: `${selectedSubject.totalMarks}/100` },
                   ].map((item) => (
                     <Grid item xs={4} key={item.label}>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem', display: 'block' }}>
                         {item.label}
                       </Typography>
-                      <Typography variant="body2" fontWeight={700}>
+                      <Typography variant="body2" fontWeight={700} sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}>
                         {item.value}
                       </Typography>
                     </Grid>

@@ -81,15 +81,15 @@ export default function StudentDashboard() {
   }
 
   return (
-    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+    <Box sx={{ width: '100%', overflow: 'hidden', px: { xs: 1, sm: 0 } }}>
       {/* Welcome Section */}
       <Box
         className="animate-fade-in-up"
         sx={{
           background: 'linear-gradient(135deg, #0a5f58 0%, #0f766e 40%, #14b8a6 100%)',
-          borderRadius: { xs: 3, sm: 4 },
+          borderRadius: { xs: 2.5, sm: 4 },
           p: { xs: 2.5, sm: 3.5 },
-          mb: { xs: 2.5, sm: 3 },
+          mb: { xs: 2.5, sm: 3.5 },
           color: 'white',
           position: 'relative',
           overflow: 'hidden',
@@ -105,10 +105,10 @@ export default function StudentDashboard() {
           background: 'radial-gradient(circle at 80% 50%, rgba(255,255,255,0.08) 0%, transparent 60%)',
           pointerEvents: 'none',
         }} />
-        <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: '1.2rem', sm: '1.6rem' }, position: 'relative', letterSpacing: '-0.02em' }}>
+        <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: '1.25rem', sm: '1.6rem' }, position: 'relative', letterSpacing: '-0.02em' }}>
           Welcome back, {user?.name}! 👋
         </Typography>
-        <Typography variant="body2" sx={{ opacity: 0.85, fontSize: { xs: '0.75rem', sm: '0.8rem' }, mt: 0.5, position: 'relative' }}>
+        <Typography variant="body2" sx={{ opacity: 0.85, fontSize: { xs: '0.75rem', sm: '0.8rem' }, mt: 0.8, position: 'relative' }}>
           Student ID: {user?.studentId} • {user?.department}
         </Typography>
       </Box>
@@ -282,8 +282,8 @@ export default function StudentDashboard() {
                   sx={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 1.5,
-                    p: 2,
+                    gap: { xs: 1, sm: 1.5 },
+                    p: { xs: 1.5, sm: 2 },
                     bgcolor: item.bg,
                     borderRadius: 3,
                     transition: 'all 0.2s ease',
@@ -293,12 +293,17 @@ export default function StudentDashboard() {
                     },
                   }}
                 >
-                  <Box sx={{ color: item.color }}>{item.icon}</Box>
+                  <Box sx={{ color: item.color, display: 'flex' }}>
+                    {item.icon === ClockIcon ? <ClockIcon sx={{ fontSize: { xs: 20, sm: 28 } }} /> :
+                      item.icon === FileIcon ? <FileIcon sx={{ fontSize: { xs: 20, sm: 28 } }} /> :
+                        item.icon === CheckCircleIcon ? <CheckCircleIcon sx={{ fontSize: { xs: 20, sm: 28 } }} /> :
+                          <CancelIcon sx={{ fontSize: { xs: 20, sm: 28 } }} />}
+                  </Box>
                   <Box>
-                    <Typography variant="h5" fontWeight={800}>
+                    <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: '1rem', sm: '1.5rem' }, lineHeight: 1.2 }}>
                       {item.value}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" fontWeight={500}>
+                    <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: { xs: '0.65rem', sm: '0.75rem' } }}>
                       {item.label}
                     </Typography>
                   </Box>

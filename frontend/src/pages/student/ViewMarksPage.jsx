@@ -105,7 +105,7 @@ export default function ViewMarksPage() {
   ];
 
   return (
-    <Box sx={{ width: '100%', overflow: 'hidden' }}>
+    <Box sx={{ width: '100%', overflow: 'hidden', px: { xs: 1, sm: 0 } }}>
       <Box sx={{ mb: { xs: 2, sm: 3 } }} className="animate-fade-in-up">
         <Typography
           variant="h5"
@@ -139,11 +139,11 @@ export default function ViewMarksPage() {
                 },
               }}
             >
-              <CardContent sx={{ textAlign: 'center', py: 3 }}>
-                <Typography variant="body2" sx={{ color: card.color, fontWeight: 600, opacity: 0.8 }}>
+              <CardContent sx={{ textAlign: 'center', py: { xs: 2, sm: 3 }, px: 1 }}>
+                <Typography variant="body2" sx={{ color: card.color, fontWeight: 600, opacity: 0.8, fontSize: { xs: '0.75rem', sm: '0.85rem' } }}>
                   {card.label}
                 </Typography>
-                <Typography variant="h3" fontWeight={800} sx={{ color: card.color, letterSpacing: '-0.02em' }}>
+                <Typography variant="h3" fontWeight={800} sx={{ color: card.color, letterSpacing: '-0.02em', fontSize: { xs: '1.75rem', sm: '3rem' } }}>
                   {card.value}
                 </Typography>
               </CardContent>

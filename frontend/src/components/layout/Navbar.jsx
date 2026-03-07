@@ -101,18 +101,29 @@ export function Navbar({ title, onMenuClick }) {
         color: 'text.primary',
       }}
     >
-      <Toolbar sx={{ gap: { xs: 1, sm: 2 }, minHeight: { xs: 56, sm: 64 }, px: { xs: 1.5, sm: 2.5 } }}>
+      <Toolbar sx={{ gap: { xs: 0.5, sm: 2 }, minHeight: { xs: 56, sm: 64 }, px: { xs: 1, sm: 2.5 } }}>
         <IconButton
           color="inherit"
           aria-label="open menu"
           edge="start"
           onClick={onMenuClick}
-          sx={{ mr: 1, display: { md: 'none' } }}
+          sx={{ mr: { xs: 0.5, sm: 1 }, display: { md: 'none' } }}
         >
           <MenuIcon />
         </IconButton>
         {title && (
-          <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' }, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            sx={{
+              fontSize: { xs: '0.95rem', sm: '1.25rem' },
+              flexShrink: 1,
+              maxWidth: { xs: '120px', sm: 'none' },
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap'
+            }}
+          >
             {title}
           </Typography>
         )}
@@ -124,8 +135,8 @@ export function Navbar({ title, onMenuClick }) {
           size="small"
           placeholder="Search..."
           sx={{
-            display: { xs: 'none', md: 'block' },
-            width: 250,
+            display: { xs: 'none', lg: 'block' }, // Only show search on large screens to save space
+            width: 200,
             '& .MuiOutlinedInput-root': {
               backgroundColor: 'rgba(240, 253, 250, 0.6)',
               borderRadius: 2.5,
@@ -245,10 +256,10 @@ export function Navbar({ title, onMenuClick }) {
           sx={{
             display: 'flex',
             alignItems: 'center',
-            gap: 1,
+            gap: { xs: 0.5, sm: 1 },
             cursor: 'pointer',
             py: 0.5,
-            px: 1,
+            px: { xs: 0.5, sm: 1 },
             borderRadius: 2.5,
             transition: 'all 0.2s ease',
             '&:hover': {
@@ -258,25 +269,25 @@ export function Navbar({ title, onMenuClick }) {
         >
           <Avatar
             sx={{
-              width: 34,
-              height: 34,
+              width: { xs: 30, sm: 34 },
+              height: { xs: 30, sm: 34 },
               bgcolor: 'primary.main',
-              fontSize: '0.85rem',
+              fontSize: '0.8rem',
               fontWeight: 700,
               boxShadow: '0 2px 8px rgba(15, 118, 110, 0.25)',
             }}
           >
             {user?.name.charAt(0).toUpperCase()}
           </Avatar>
-          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
             <Typography
               variant="body2"
               fontWeight={600}
-              sx={{ lineHeight: 1.2 }}
+              sx={{ lineHeight: 1.2, fontSize: '0.8rem' }}
             >
               {user?.name}
             </Typography>
-            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.65rem' }}>
+            <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.6rem' }}>
               {user?.role === 'admin' ? 'Administrator' : 'Student'}
             </Typography>
           </Box>

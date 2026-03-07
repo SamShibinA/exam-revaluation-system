@@ -60,7 +60,7 @@ export default function ManageStudentsPage() {
   };
 
   return (
-    <Box sx={{ width: "100%", overflow: "hidden" }}>
+    <Box sx={{ width: "100%", overflow: "hidden", px: { xs: 1, sm: 0 } }}>
       <Box sx={{ mb: { xs: 2, sm: 3 } }} className="animate-fade-in-up">
         <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" }, letterSpacing: '-0.02em' }}>
           Manage Students 👨‍🎓

@@ -65,8 +65,8 @@ export function RequestTimeline({ currentStatus }) {
               >
                 <Box
                   sx={{
-                    width: 40,
-                    height: 40,
+                    width: { xs: 32, sm: 40 },
+                    height: { xs: 32, sm: 40 },
                     borderRadius: '50%',
                     background: getBgColor(),
                     color:
@@ -83,7 +83,7 @@ export function RequestTimeline({ currentStatus }) {
                     animation: isCurrent ? 'pulseRing 2s infinite' : 'none',
                   }}
                 >
-                  {showRejected ? <CloseIcon sx={{ fontSize: 18 }} /> : <Icon sx={{ fontSize: 18 }} />}
+                  {showRejected ? <CloseIcon sx={{ fontSize: { xs: 14, sm: 18 } }} /> : <Icon sx={{ fontSize: { xs: 14, sm: 18 } }} />}
                 </Box>
                 <Typography
                   variant="caption"

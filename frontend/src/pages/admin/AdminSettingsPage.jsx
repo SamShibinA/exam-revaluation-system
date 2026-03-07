@@ -100,7 +100,7 @@ export default function AdminSettingsPage() {
   );
 
   return (
-    <Box sx={{ maxWidth: 700, mx: "auto", width: "100%", px: { xs: 0, sm: 1 } }}>
+    <Box sx={{ maxWidth: 700, mx: "auto", width: "100%", px: { xs: 1, sm: 2 } }}>
       <Box sx={{ mb: { xs: 2, sm: 3 } }} className="animate-fade-in-up">
         <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" }, letterSpacing: '-0.02em' }}>
           Settings ⚙️

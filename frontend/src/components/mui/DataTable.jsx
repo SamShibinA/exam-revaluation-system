@@ -56,7 +56,7 @@ export function DataTable({
             placeholder={searchPlaceholder}
             value={searchQuery}
             onChange={(e) => handleSearch(e.target.value)}
-            sx={{ maxWidth: { sm: 320 } }}
+            sx={{ width: { xs: '100%', sm: 320 } }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -87,6 +87,7 @@ export function DataTable({
                   sx={{
                     backgroundColor: '#f0fdfa',
                     borderBottom: '2px solid #ccfbf1',
+                    px: { xs: 1, sm: 2 },
                   }}
                 >
                   {column.header}
