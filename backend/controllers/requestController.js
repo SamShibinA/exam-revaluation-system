@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import Request from "../models/Request.js";
 import Student from "../models/Student.js";
 import Subject from "../models/Subject.js";
+import Notification from "../models/Notification.js";
+import Admin from "../models/Admin.js";
 
 // ✅ Get requests of a particular student
 export const getMyRequests = async (req, res) => {
@@ -75,6 +77,18 @@ export const createRequest = async (req, res) => {
 
     const populatedRequest = await Request.findById(newRequest._id)
       .populate("subjectId", "code name semester credits");
+
+    // Notify all admins (auth uses Admin model; JWT contains Admin._id)
+    const admins = await Admin.find({});
+    const notifications = admins.map((admin) => ({
+      userId: admin._id,
+      title: "New Request Submitted",
+      message: `A new ${requestType} request has been submitted for subject ${populatedRequest.subjectId?.name || "Unknown"}.`,
+      type: "info",
+    }));
+    if (notifications.length > 0) {
+      await Notification.insertMany(notifications);
+    }
 
     res.status(201).json(populatedRequest);
   } catch (error) {
@@ -172,6 +186,18 @@ export const updateRequestStatus = async (req, res) => {
     const updatedRequest = await Request.findById(id)
       .populate("subjectId", "code name semester credits")
       .populate("studentId", "name email");
+
+    // Notify the student (auth uses Student model; request.studentId is Student._id from frontend)
+    const studentUserId = request.studentId;
+    if (studentUserId) {
+      const newStatus = status || request.status;
+      await Notification.create({
+        userId: studentUserId,
+        title: "Request Status Updated",
+        message: `Your request for ${updatedRequest.subjectId?.name || "subject"} has been updated to: ${newStatus}.${adminRemarks ? ` Remarks: ${adminRemarks}` : ""}`,
+        type: newStatus === "approved" || newStatus === "completed" ? "success" : newStatus === "rejected" ? "error" : "info",
+      });
+    }
 
     res.json(updatedRequest);
   } catch (error) {

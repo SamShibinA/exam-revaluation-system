@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import {
   AppBar,
@@ -29,6 +29,52 @@ export function Navbar({ title, onMenuClick }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [notifAnchorEl, setNotifAnchorEl] = useState(null);
 
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchNotifications = async () => {
+    if (!user) return;
+    try {
+      const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+      const token = localStorage.getItem("auth_token");
+      const res = await fetch(`${BASE_URL}/notifications`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setNotifications(data);
+        setUnreadCount(data.filter((n) => !n.isRead).length);
+      }
+    } catch (err) {
+      console.error("Failed to fetch notifications", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+
+    // Poll for notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, [user]);
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+      const token = localStorage.getItem("auth_token");
+      const res = await fetch(`${BASE_URL}/notifications/${id}/read`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setNotifications(notifications.map(n => n._id === id ? { ...n, isRead: true } : n));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (err) {
+      console.error("Failed to mark notification as read", err);
+    }
+  };
+
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -39,6 +85,7 @@ export function Navbar({ title, onMenuClick }) {
 
   const handleNotifOpen = (event) => {
     setNotifAnchorEl(event.currentTarget);
+    fetchNotifications(); // fresh list when opening
   };
 
   const handleNotifClose = () => {
@@ -118,7 +165,7 @@ export function Navbar({ title, onMenuClick }) {
             },
           }}
         >
-          <Badge badgeContent={3} color="error">
+          <Badge badgeContent={unreadCount} color="error">
             <NotificationsIcon />
           </Badge>
         </IconButton>
@@ -138,68 +185,57 @@ export function Navbar({ title, onMenuClick }) {
               Notifications
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              You have 3 unread messages
+              {unreadCount === 0 ? "You have no unread messages" : `You have ${unreadCount} unread message${unreadCount > 1 ? 's' : ''}`}
             </Typography>
           </Box>
           <Divider />
 
-          {[
-            {
-              title: 'Request Approved',
-              description: 'Your revaluation request for CS301 has been approved.',
-              time: '2 min ago',
-              color: '#22c55e',
-            },
-            {
-              title: 'New Document Uploaded',
-              description: 'Response sheet for CS302 is now available.',
-              time: '1 hour ago',
-              color: '#0ea5e9',
-            },
-            {
-              title: 'Marks Updated',
-              description: 'Your marks for CS303 have been updated.',
-              time: '3 hours ago',
-              color: '#f59e0b',
-            },
-          ].map((notif, i) => (
-            <MenuItem
-              key={i}
-              onClick={handleNotifClose}
-              sx={{ py: 1.5, px: 2 }}
-            >
-              <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', width: '100%' }}>
-                <Box sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  backgroundColor: notif.color,
-                  mt: 0.8,
-                  flexShrink: 0,
-                }} />
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                    <Typography variant="body2" fontWeight={600}>
-                      {notif.title}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary" sx={{ ml: 1, flexShrink: 0 }}>
-                      {notif.time}
+          {notifications.length === 0 ? (
+            <Box sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                No notifications yet.
+              </Typography>
+            </Box>
+          ) : (
+            notifications.map((notif) => (
+              <MenuItem
+                key={notif._id}
+                onClick={() => handleMarkAsRead(notif._id)}
+                sx={{ py: 1.5, px: 2, bgcolor: notif.isRead ? 'transparent' : 'rgba(15, 118, 110, 0.05)' }}
+              >
+                <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', width: '100%' }}>
+                  <Box sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    backgroundColor: notif.type === 'success' ? '#22c55e' : notif.type === 'error' ? '#ef4444' : notif.type === 'warning' ? '#f59e0b' : '#0ea5e9',
+                    mt: 0.8,
+                    flexShrink: 0,
+                  }} />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <Typography variant="body2" fontWeight={notif.isRead ? 500 : 700}>
+                        {notif.title}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{ ml: 1, flexShrink: 0 }}>
+                        {new Date(notif.createdAt).toLocaleDateString()}
+                      </Typography>
+                    </Box>
+                    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.3, whiteSpace: 'normal' }}>
+                      {notif.message}
                     </Typography>
                   </Box>
-                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.3 }}>
-                    {notif.description}
-                  </Typography>
                 </Box>
-              </Box>
-            </MenuItem>
-          ))}
+              </MenuItem>
+            ))
+          )}
 
           <Divider />
           <MenuItem
-            onClick={handleNotifClose}
+            onClick={fetchNotifications}
             sx={{ justifyContent: 'center', color: 'primary.main', fontWeight: 600, py: 1.5 }}
           >
-            View all notifications
+            Refresh Notifications
           </MenuItem>
         </Menu>
 

@@ -2,6 +2,8 @@ import express from "express";
 import multer from "multer";
 import Upload from "../models/Upload.js";
 import Request from "../models/Request.js";
+import Notification from "../models/Notification.js";
+import User from "../models/User.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
@@ -35,16 +37,27 @@ router.post(
       await newUpload.save();
 
       // Update request status to 'completed' when any document is uploaded
-      const updateData = {
-        status: "completed",
-        updatedAt: new Date(),
-      };
+      const request = await Request.findById(requestId).populate("studentId", "email");
+      if (request) {
+        request.status = "completed";
+        request.updatedAt = new Date();
+        if (documentType === "response_sheet") {
+          request.responseSheet = newUpload.fileUrl;
+        }
+        await request.save();
 
-      if (documentType === "response_sheet") {
-        updateData.responseSheet = newUpload.fileUrl;
+        if (request.studentId && request.studentId.email) {
+          const studentUser = await User.findOne({ email: request.studentId.email });
+          if (studentUser) {
+            await Notification.create({
+              userId: studentUser._id,
+              title: "Document Uploaded",
+              message: "A response sheet or document has been uploaded for your request.",
+              type: "success",
+            });
+          }
+        }
       }
-
-      await Request.findByIdAndUpdate(requestId, updateData);
 
       res.status(201).json(newUpload);
     } catch (error) {
