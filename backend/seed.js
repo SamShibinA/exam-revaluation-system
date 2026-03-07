@@ -41,20 +41,8 @@ const seedData = async () => {
         console.log("Seeding Admins...");
         await Admin.insertMany([
             {
-                name: "Demo Admin",
-                email: "admin@university.edu",
-                password: adminPassword,
-                department: "Exam Controller",
-            },
-            {
-                name: "Postman Admin",
-                email: "postman_admin@university.edu",
-                password: adminPassword,
-                department: "IT Support",
-            },
-            {
-                name: "sam",
-                email: "sam@gmail.com",
+                name: "Sam Shibin",
+                email: "samshibin1125@gmail.com",
                 password: samPassword,
                 department: "Exam Department",
             },
@@ -64,113 +52,23 @@ const seedData = async () => {
         console.log("Seeding Students...");
         const studentsData = [
             {
-                name: "Demo Student",
-                email: "student@university.edu",
+                name: "Sam Shibin",
+                email: "samshibin.it23@bitsathy.ac.in",
                 password: studentPassword, // student123
                 role: "student",
-                studentId: "STU1001",
+                studentId: "STU1000",
                 department: "Computer Science",
                 currentSemester: 5,
-                cgpa: 8.5,
-            },
-            {
-                name: "Postman Student",
-                email: "postman_student@university.edu",
-                password: studentPassword, // student123
-                role: "student",
-                studentId: "STU1002",
-                department: "Computer Science",
-                currentSemester: 3,
-                cgpa: 7.9,
+                cgpa: 9.0,
             },
         ];
 
-        // Generate 10 Random Students
-        for (let i = 1; i <= 10; i++) {
-            studentsData.push({
-                name: `Student ${i}`,
-                email: `student${i}@university.edu`,
-                password: commonPassword, // password123
-                role: "student",
-                studentId: `STU${2000 + i}`,
-                department: i % 2 === 0 ? "Computer Science" : "Mechanical Engineering",
-                currentSemester: Math.floor(Math.random() * 8) + 1,
-                cgpa: (Math.random() * (10 - 6) + 6).toFixed(2),
-            });
-        }
-
         const students = await Student.insertMany(studentsData);
 
-        // --- Create Marks and Requests ---
-        console.log("Seeding Marks & Requests...");
-        const marksData = [];
-        const requestsData = [];
-
-        for (const student of students) {
-            // Assign marks for random subjects
-            const numSubjects = Math.floor(Math.random() * 3) + 2; // 2 to 4 subjects
-            const shuffledSubjects = subjects.sort(() => 0.5 - Math.random()).slice(0, numSubjects);
-
-            for (const subject of shuffledSubjects) {
-                const internalMarks = Math.floor(Math.random() * 25) + 15; // 15 to 40
-                const externalMarks = Math.floor(Math.random() * 40) + 20; // 20 to 60
-                const totalMarks = internalMarks + externalMarks;
-
-                let grade = "F";
-                if (totalMarks >= 90) grade = "A+";
-                else if (totalMarks >= 80) grade = "A";
-                else if (totalMarks >= 70) grade = "B";
-                else if (totalMarks >= 60) grade = "C";
-                else if (totalMarks >= 50) grade = "D";
-
-                marksData.push({
-                    studentId: student._id,
-                    subjectId: subject._id,
-                    internalMarks,
-                    externalMarks,
-                    totalMarks,
-                    grade,
-                    semester: subject.semester,
-                    academicYear: "2024-25"
-                });
-
-                // Randomly create a request for some low marks
-                if (totalMarks < 75 && Math.random() > 0.5) {
-                    const statusOptions = ["pending", "approved", "rejected", "in_review"];
-                    const status = statusOptions[Math.floor(Math.random() * statusOptions.length)];
-
-                    let updatedMarks = undefined;
-                    let adminRemarks = undefined;
-
-                    if (status === "approved") {
-                        updatedMarks = totalMarks + Math.floor(Math.random() * 10) + 1;
-                        adminRemarks = "Verified calculation error. Marks updated.";
-                    } else if (status === "rejected") {
-                        adminRemarks = "No discrepancy found.";
-                    }
-
-                    requestsData.push({
-                        studentId: student._id,
-                        subjectId: subject._id,
-                        requestType: Math.random() > 0.5 ? "revaluation" : "recheck",
-                        reason: "Not satisfied with the grade.",
-                        currentMarks: totalMarks,
-                        status: status,
-                        updatedMarks,
-                        adminRemarks,
-                        createdAt: new Date(new Date() - Math.floor(Math.random() * 1000000000)), // Random time in past
-                    });
-                }
-            }
-        }
-
-        await Mark.insertMany(marksData);
-        await Request.insertMany(requestsData);
+        // --- (Skipping Marks and Requests as requested) ---
 
         console.log(`✅ Database Seeded Successfully!`);
         console.log(`- ${students.length} Students`);
-        console.log(`- ${marksData.length} Marks`);
-        console.log(`- ${requestsData.length} Requests`);
         process.exit();
     } catch (error) {
         console.error("❌ Seeding Error:", error);

@@ -77,6 +77,31 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
+  const loginWithGoogle = useCallback(async (credential) => {
+    dispatch({ type: "AUTH_START" });
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/auth/google`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ credential }),
+        }
+      );
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || "Google sign-in failed");
+      }
+      localStorage.setItem("auth_token", data.token);
+      localStorage.setItem("auth_user", JSON.stringify(data.user));
+      dispatch({ type: "AUTH_SUCCESS", payload: data });
+      return data;
+    } catch (error) {
+      dispatch({ type: "AUTH_FAILURE" });
+      throw error;
+    }
+  }, []);
+
   // ✅ LOGIN (DIRECT CALL TO BACKEND — NO SERVICES, NO API CLIENT)
   const login = useCallback(async (credentials) => {
     dispatch({ type: "AUTH_START" });
@@ -119,6 +144,7 @@ export function AuthProvider({ children }) {
   const value = {
     ...state,
     login,
+    loginWithGoogle,
     logout,
     isStudent: state.user?.role === "student",
     isAdmin: state.user?.role === "admin",

@@ -56,7 +56,9 @@ export default function UploadDocumentPage() {
         });
         const data = await res.json();
         if (data && Array.isArray(data.data)) {
-          setRequests(data.data);
+          // Show only review requests (not revaluation) for response sheet upload
+          const reviewOnly = data.data.filter((r) => (r.requestType || "").toLowerCase() === "review");
+          setRequests(reviewOnly);
         }
       } catch (error) {
         console.error("Failed to fetch requests:", error);
@@ -129,7 +131,7 @@ export default function UploadDocumentPage() {
       <Card sx={{ mb: 3 }} className="animate-fade-in-up animate-stagger-1">
         <CardHeader
           title="Upload Response Sheet"
-          subheader="Upload the scanned response sheet for a revaluation request"
+          subheader="Upload the scanned response sheet for a review request"
           titleTypographyProps={{ variant: "h6" }}
         />
         <CardContent>

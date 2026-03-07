@@ -3,6 +3,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SnackbarProvider } from 'notistack';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { theme } from "./theme/theme";
@@ -95,6 +96,16 @@ const AppRoutes = () => {
   );
 };
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+
+const AppContent = () => (
+  <AuthProvider>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  </AuthProvider>
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider theme={theme}>
@@ -103,11 +114,13 @@ const App = () => (
         maxSnack={3}
         anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        <AuthProvider>
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </AuthProvider>
+        {GOOGLE_CLIENT_ID ? (
+          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            <AppContent />
+          </GoogleOAuthProvider>
+        ) : (
+          <AppContent />
+        )}
       </SnackbarProvider>
     </ThemeProvider>
   </QueryClientProvider>

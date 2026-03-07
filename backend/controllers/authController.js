@@ -1,7 +1,16 @@
 import bcrypt from "bcryptjs";
+import { OAuth2Client } from "google-auth-library";
 import Student from "../models/Student.js";
 import Admin from "../models/Admin.js";
 import { generateToken } from "../utils/generateToken.js";
+
+const getGoogleClient = () => {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    throw new Error("GOOGLE_CLIENT_ID is not configured in server .env");
+  }
+  return new OAuth2Client(clientId);
+};
 
 export const loginUser = async (req, res) => {
   try {
@@ -43,6 +52,77 @@ export const loginUser = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential) {
+      return res.status(400).json({ message: "Google credential is required" });
+    }
+
+    const googleClient = getGoogleClient();
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    if (!payload) {
+      return res.status(401).json({ message: "Invalid Google token" });
+    }
+    const { email, name, picture } = payload;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email not provided by Google" });
+    }
+
+    // Check Admin first (admins may use Google if email matches)
+    let user = await Admin.findOne({ email });
+    let role = "admin";
+
+    // If not admin, check Student
+    if (!user) {
+      user = await Student.findOne({ email });
+      role = "student";
+    }
+
+    // If user is not found in either collection, reject login
+    if (!user) {
+      return res.status(403).json({ message: "Access denied. Your email is not registered in the system." });
+    }
+
+    const token = generateToken(user._id);
+
+    res.json({
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role,
+        studentId: user.studentId,
+        department: user.department,
+        picture: user.picture || picture,
+      },
+      token,
+    });
+  } catch (error) {
+    console.error("Google login error:", error);
+    const msg = String(error?.message || "Google sign-in failed");
+    if (msg.includes("GOOGLE_CLIENT_ID is not configured")) {
+      return res.status(500).json({ message: msg });
+    }
+    // Common verifyIdToken errors: wrong audience, token expired, etc.
+    if (
+      msg.toLowerCase().includes("wrong recipient") ||
+      msg.toLowerCase().includes("audience") ||
+      msg.toLowerCase().includes("token used too late") ||
+      msg.toLowerCase().includes("invalid token") ||
+      msg.toLowerCase().includes("jwt")
+    ) {
+      return res.status(401).json({ message: "Invalid Google token (check Client ID and authorized origin)" });
+    }
+    return res.status(500).json({ message: "Google sign-in failed. Please try again." });
   }
 };
 

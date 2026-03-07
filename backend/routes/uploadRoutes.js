@@ -37,6 +37,8 @@ router.post(
       if (documentType === "response_sheet") {
         await Request.findByIdAndUpdate(requestId, {
           responseSheet: newUpload.fileUrl,
+          status: "completed",
+          updatedAt: new Date(),
         });
       }
 

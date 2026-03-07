@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 import {
   Box,
   Card,
@@ -11,17 +12,38 @@ import {
   Alert,
   CircularProgress,
   Link as MuiLink,
+  Divider,
 } from '@mui/material';
 import { School as SchoolIcon } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, isLoading } = useAuth();
+  const { login, loginWithGoogle, isLoading } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    if (!credentialResponse?.credential) return;
+    setError(null);
+    setIsGoogleLoading(true);
+    try {
+      const data = await loginWithGoogle(credentialResponse.credential);
+      enqueueSnackbar('Welcome! You have successfully signed in with Google.', { variant: 'success' });
+      if (data.user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/student');
+      }
+    } catch (err) {
+      setError(err?.message || 'Google sign-in failed');
+    } finally {
+      setIsGoogleLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -201,7 +223,7 @@ export default function LoginPage() {
               size="large"
               disabled={isLoading}
               sx={{
-                mb: 3,
+                mb: 2,
                 py: 1.3,
                 fontSize: '0.9rem',
                 background: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
@@ -220,64 +242,27 @@ export default function LoginPage() {
               )}
             </Button>
 
-            {/* Demo Credentials */}
-            <Box sx={{
-              background: 'linear-gradient(135deg, rgba(240, 253, 250, 0.8) 0%, rgba(204, 251, 241, 0.3) 100%)',
-              borderRadius: 3,
-              p: 2,
-              border: '1px solid rgba(204, 251, 241, 0.5)',
-            }}>
-              <Typography
-                variant="caption"
-                fontWeight={600}
-                color="text.secondary"
-                display="block"
-                textAlign="center"
-                mb={1.5}
-                sx={{ letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.6rem' }}
-              >
-                Demo Credentials
-              </Typography>
-
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  bgcolor: 'rgba(255,255,255,0.7)',
-                  px: 2,
-                  py: 1,
-                  borderRadius: 2,
-                  mb: 1,
-                }}
-              >
-                <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                  👨‍🎓 Student:
-                </Typography>
-                <Typography variant="caption" fontFamily="monospace" fontWeight={600} sx={{ fontSize: '0.68rem' }}>
-                  student@university.edu / student123
-                </Typography>
-              </Box>
-
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  bgcolor: 'rgba(255,255,255,0.7)',
-                  px: 2,
-                  py: 1,
-                  borderRadius: 2,
-                }}
-              >
-                <Typography variant="caption" color="text.secondary" fontWeight={500}>
-                  🛡️ Admin:
-                </Typography>
-                <Typography variant="caption" fontFamily="monospace" fontWeight={600} sx={{ fontSize: '0.68rem' }}>
-                  admin@university.edu / admin123
-                </Typography>
-              </Box>
-            </Box>
+            {import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+              <>
+                <Divider sx={{ my: 2 }}>or</Divider>
+                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => {
+                      setError('Google sign-in was cancelled or failed');
+                      setIsGoogleLoading(false);
+                    }}
+                    use_fedcm_for_prompt
+                    theme="filled_black"
+                    size="large"
+                    text="signin_with"
+                    shape="rectangular"
+                    width={320}
+                    locale="en"
+                  />
+                </Box>
+              </>
+            )}
           </form>
         </CardContent>
       </Card>
