@@ -94,7 +94,15 @@ export default function ApplyForm({ type }) {
           throw new Error(data.message || 'Failed to fetch marks');
         }
 
-        setMarks(Array.isArray(data) ? data : []);
+        let marksData = Array.isArray(data) ? data : [];
+        if (marksData.length > 0) {
+          // Find the maximum semester among the student's marks
+          const maxSemester = Math.max(...marksData.map(m => m.subjectId?.semester || 0));
+          // Filter marks to only include subjects from the maximum semester
+          marksData = marksData.filter(m => (m.subjectId?.semester || 0) === maxSemester);
+        }
+
+        setMarks(marksData);
       } catch (error) {
         console.error('Failed to fetch marks:', error);
         setMarks([]);

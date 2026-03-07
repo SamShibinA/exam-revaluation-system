@@ -34,13 +34,17 @@ router.post(
 
       await newUpload.save();
 
+      // Update request status to 'completed' when any document is uploaded
+      const updateData = {
+        status: "completed",
+        updatedAt: new Date(),
+      };
+
       if (documentType === "response_sheet") {
-        await Request.findByIdAndUpdate(requestId, {
-          responseSheet: newUpload.fileUrl,
-          status: "completed",
-          updatedAt: new Date(),
-        });
+        updateData.responseSheet = newUpload.fileUrl;
       }
+
+      await Request.findByIdAndUpdate(requestId, updateData);
 
       res.status(201).json(newUpload);
     } catch (error) {
