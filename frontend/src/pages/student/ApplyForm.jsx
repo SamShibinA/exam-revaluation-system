@@ -5,6 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useAuth } from '../../context/AuthContext';
 import { PageLoader } from '../../components/mui/PageLoader';
+import GooglePayButton from '../../components/student/GooglePayButton';
+import PaymentSimulationPopup from '../../components/student/PaymentSimulationPopup';
 
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
@@ -65,7 +67,12 @@ export default function ApplyForm({ type }) {
     },
   });
 
+  const [paymentData, setPaymentData] = useState(null);
+  const [isPaymentPopupOpen, setIsPaymentPopupOpen] = useState(false);
+  const [pendingValues, setPendingValues] = useState(null);
+
   const isReview = type === 'review';
+  const amount = isReview ? 500 : 1000;
   const title = isReview ? 'Apply for Review' : 'Apply for Revaluation';
   const description = isReview
     ? 'Request to view your answer sheet for a particular subject'
@@ -114,11 +121,59 @@ export default function ApplyForm({ type }) {
     fetchMarks();
   }, [user?.id]);
 
+  const handlePaymentSuccess = (data) => {
+    const newPaymentData = data || { status: 'success' };
+    setPaymentData(newPaymentData);
+    enqueueSnackbar('Payment verified successfully!', { variant: 'success' });
+    
+    if (pendingValues) {
+      submitRequest(pendingValues, newPaymentData);
+      setPendingValues(null); // Clear after submission
+    }
+  };
+
+  const initiatePayment = async (values) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const res = await fetch(`${API_URL}/payments/verify-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+        body: JSON.stringify({
+          amount,
+          studentEmail: user.email,
+          studentId: user.id,
+          requestType: type
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Payment failed');
+      
+      handlePaymentSuccess(data.paymentData);
+    } catch (error) {
+      enqueueSnackbar(error.message, { variant: 'error' });
+    }
+  };
+
   const onSubmit = async (values) => {
     if (!user?.id) {
       enqueueSnackbar('You must be logged in to submit a request', { variant: 'error' });
       return;
     }
+
+    if (!paymentData) {
+      setPendingValues(values);
+      setIsPaymentPopupOpen(true);
+      return;
+    }
+    
+    await submitRequest(values, paymentData);
+  };
+
+  const submitRequest = async (values, paymentInfo) => {
     const selectedMark = marks.find((m) => getSubjectId(m) === values.subjectId);
     setIsSubmitting(true);
     try {
@@ -131,10 +186,15 @@ export default function ApplyForm({ type }) {
         },
         body: JSON.stringify({
           studentId: user.id,
+          studentEmail: user.email,
           subjectId: values.subjectId,
           requestType: type,
           reason: values.reason,
           currentMarks: selectedMark?.totalMarks ?? null,
+          amountPaid: amount,
+          paymentStatus: paymentInfo.status,
+          paymentMethod: 'Google Pay',
+          transactionId: paymentInfo.transactionId
         }),
       });
 
@@ -333,31 +393,51 @@ export default function ApplyForm({ type }) {
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={isSubmitting}
-                startIcon={
-                  isSubmitting ? (
-                    <CircularProgress size={20} />
-                  ) : (
-                    <CheckIcon />
-                  )
-                }
-                sx={{
-                  px: 3,
-                  background: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #0d5c56 0%, #0f766e 100%)',
-                  },
-                }}
-              >
-                {isSubmitting ? 'Submitting...' : 'Submit Request'}
-              </Button>
+              {!paymentData ? (
+                <GooglePayButton 
+                  onClick={handleSubmit(onSubmit)} 
+                  disabled={isSubmitting || !watchedSubjectId || reasonValue.length < 20}
+                  amount={amount}
+                />
+              ) : (
+                <Button
+                  type="submit"
+                  variant="contained"
+                  disabled={isSubmitting}
+                  startIcon={
+                    isSubmitting ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      <CheckIcon />
+                    )
+                  }
+                  sx={{
+                    px: 3,
+                    flex: 1,
+                    background: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #0d5c56 0%, #0f766e 100%)',
+                    },
+                  }}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                </Button>
+              )}
             </Box>
           </form>
         </CardContent>
       </Card>
+
+      <PaymentSimulationPopup
+        open={isPaymentPopupOpen}
+        onClose={() => setIsPaymentPopupOpen(false)}
+        amount={amount}
+        onPaymentSuccess={handlePaymentSuccess}
+        studentEmail={user?.email}
+        studentId={user?.id}
+        requestType={type}
+        initiatePayment={initiatePayment}
+      />
     </Box>
   );
 }

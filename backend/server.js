@@ -6,6 +6,7 @@ import { connectDB } from "./config/db.js";
 import marksRoutes from "./routes/markRoutes.js";
 import requestRoutes from "./routes/requestRoutes.js";
 import adminSettingsRoutes from "./routes/adminSettingsRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
 import studentRoutes from "./routes/studentRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
@@ -22,6 +23,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api", marksRoutes);
 app.use("/api", requestRoutes);
 app.use("/api", adminSettingsRoutes);
+app.use("/api/payments", paymentRoutes);
 app.use("/api/students", studentRoutes);
 
 app.use("/api", uploadRoutes);
