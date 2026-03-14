@@ -7,16 +7,29 @@ export const getStudentMarks = async (req, res) => {
   try {
     const { studentId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(studentId)) {
-      return res.status(400).json({ message: "Invalid student ID" });
-    }
-
     // Students can only fetch their own marks
     if (req.user?.id && req.user.id !== studentId) {
-      return res.status(403).json({ message: "Not allowed to view another student's marks" });
+      // Note: req.user.id is the MongoDB _id. If studentId parameter is a custom string ID,
+      // we need to make sure we don't block valid requests. But typically req.user.id is used here.
+      // We will allow if req.user.id == studentId OR req.user.studentId == studentId
+      if (req.user.studentId !== studentId) {
+        return res.status(403).json({ message: "Not allowed to view another student's marks" });
+      }
     }
 
-    const marks = await Mark.find({ studentId })
+    // Fetch marks by db ObjectId or custom studentId
+    // Standard schema usually uses DB ObjectId for studentId ref in Marks
+    // We try to find target student to get their _id
+    let dbId = studentId;
+    if (mongoose.Types.ObjectId.isValid(studentId)) {
+      dbId = studentId;
+    } else {
+      const student = await Student.findOne({ studentId: studentId });
+      if (!student) return res.status(404).json({ message: "Student not found" });
+      dbId = student._id;
+    }
+
+    const marks = await Mark.find({ studentId: dbId })
       .populate("subjectId", "code name semester credits");
 
     res.json(marks);
@@ -30,16 +43,18 @@ export const getStudentStats = async (req, res) => {
   try {
     const { studentId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(studentId)) {
-      return res.status(400).json({ message: "Invalid student ID" });
-    }
-
     // Students can only fetch their own stats
     if (req.user?.id && req.user.id !== studentId) {
-      return res.status(403).json({ message: "Not allowed to view another student's stats" });
+      if (req.user.studentId !== studentId) {
+        return res.status(403).json({ message: "Not allowed to view another student's stats" });
+      }
     }
 
-    let targetStudent = await Student.findById(studentId);
+    let targetStudent = null;
+    if (mongoose.Types.ObjectId.isValid(studentId)) {
+      targetStudent = await Student.findById(studentId);
+    }
+    
     if (!targetStudent) {
       targetStudent = await Student.findOne({ studentId: studentId });
     }

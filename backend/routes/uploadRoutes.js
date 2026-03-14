@@ -5,6 +5,7 @@ import Request from "../models/Request.js";
 import Notification from "../models/Notification.js";
 import User from "../models/User.js";
 import authMiddleware from "../middleware/authMiddleware.js";
+import adminMiddleware from "../middleware/adminMiddleware.js";
 
 const router = express.Router();
 
@@ -14,12 +15,21 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
+const fileFilter = (req, file, cb) => {
+  const allowedMimeTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+  if (allowedMimeTypes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only PDF, JPG, and PNG are allowed.'), false);
+  }
+};
 
-const upload = multer({ storage });
+const upload = multer({ storage, fileFilter });
 
 router.post(
   "/uploads",
   authMiddleware,
+  adminMiddleware,
   upload.single("file"),
   async (req, res) => {
     try {
@@ -67,7 +77,7 @@ router.post(
   }
 );
 
-router.get("/uploads", authMiddleware, async (req, res) => {
+router.get("/uploads", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     let { page = 1, limit = 10 } = req.query;
     page = Number(page);
@@ -97,7 +107,7 @@ router.get("/uploads", authMiddleware, async (req, res) => {
   }
 });
 
-router.delete("/uploads/:id", authMiddleware, async (req, res) => {
+router.delete("/uploads/:id", authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const upload = await Upload.findById(req.params.id);
     if (!upload) {

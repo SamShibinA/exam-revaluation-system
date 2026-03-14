@@ -49,14 +49,29 @@ export const getMyRequests = async (req, res) => {
 // ✅ Create new request
 export const createRequest = async (req, res) => {
   try {
-    const { studentId, subjectId, requestType, reason, currentMarks } = req.body;
+    const { studentId, subjectId, requestType, reason, currentMarks, transactionId } = req.body; // Added transactionId
 
-    if (!studentId || !subjectId || !requestType || !reason) {
-      return res.status(400).json({ message: "studentId, subjectId, requestType and reason are required" });
+    if (!studentId || !subjectId || !requestType || !reason || !transactionId) { // Updated required fields check
+      return res.status(400).json({ message: "studentId, subjectId, requestType, transactionId and reason are required" }); // Updated message
     }
 
     if (!mongoose.Types.ObjectId.isValid(studentId) || !mongoose.Types.ObjectId.isValid(subjectId)) {
       return res.status(400).json({ message: "Invalid studentId or subjectId" });
+    }
+
+    // Verify transaction securely from database
+    const transaction = await Transaction.findOne({ transactionId });
+    if (!transaction) {
+      return res.status(404).json({ message: "Transaction not found. Payment verification failed." });
+    }
+    if (transaction.paymentStatus !== "success") {
+      return res.status(400).json({ message: "Payment must be successful to submit a request" });
+    }
+    if (transaction.studentId.toString() !== studentId) {
+      return res.status(403).json({ message: "Transaction does not belong to this student" });
+    }
+    if (transaction.requestId) {
+      return res.status(400).json({ message: "This transaction has already been used for another request" });
     }
 
     // Students can only create requests for themselves
