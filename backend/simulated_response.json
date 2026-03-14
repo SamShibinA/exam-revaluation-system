@@ -1,0 +1,119 @@
+[
+  {
+    "id": "69b3a9590546991b04d9347c",
+    "studentId": "69aa720defac09f41bddc1bb",
+    "subjectId": "69aa767e78b6e529392f2ddf",
+    "subject": {
+      "_id": "69aa767e78b6e529392f2ddf",
+      "code": "22IT504",
+      "name": "INTERNET OF THINGS",
+      "semester": 5,
+      "credits": 3
+    },
+    "requestType": "revaluation",
+    "reason": "I am applying for revaluation for 22IT504. I believe my score should be higher.",
+    "currentMarks": 85,
+    "status": "pending",
+    "amountPaid": 1000,
+    "paymentStatus": "success",
+    "createdAt": "2026-03-13T06:06:17.005Z"
+  },
+  {
+    "id": "69b3a8460546991b04d9344b",
+    "studentId": "69aa720defac09f41bddc1bb",
+    "subjectId": "69aa767e78b6e529392f2dd3",
+    "subject": {
+      "_id": "69aa767e78b6e529392f2dd3",
+      "code": "22IT501",
+      "name": "PRINCIPLES OF COMMUNICATION",
+      "semester": 5,
+      "credits": 3
+    },
+    "requestType": "review",
+    "reason": "I believe my answers in the second section were not evaluated correctly. Please review the script. Fresh attempt for 22IT501.",
+    "currentMarks": 85,
+    "status": "pending",
+    "amountPaid": 500,
+    "paymentStatus": "success",
+    "createdAt": "2026-03-13T06:01:42.460Z"
+  },
+  {
+    "id": "69abb3c1e9761b612d6cce4d",
+    "studentId": "69aa720defac09f41bddc1bb",
+    "subjectId": "69aa767e78b6e529392f2ddf",
+    "subject": {
+      "_id": "69aa767e78b6e529392f2ddf",
+      "code": "22IT504",
+      "name": "INTERNET OF THINGS",
+      "semester": 5,
+      "credits": 3
+    },
+    "requestType": "review",
+    "reason": "i write well but i got average marks",
+    "currentMarks": 85,
+    "status": "completed",
+    "paymentStatus": "pending",
+    "responseSheet": "http://localhost:5000/uploads/1772860424319-Untitled.pdf",
+    "createdAt": "2026-03-07T05:12:33.423Z",
+    "updatedAt": "2026-03-07T05:13:44.384Z"
+  },
+  {
+    "id": "69abab04ac81d4e1ac29cb5b",
+    "studentId": "69aa720defac09f41bddc1bb",
+    "subjectId": "69aa767e78b6e529392f2dd7",
+    "subject": {
+      "_id": "69aa767e78b6e529392f2dd7",
+      "code": "22IT502",
+      "name": "COMPUTER NETWORKS",
+      "semester": 5,
+      "credits": 3
+    },
+    "requestType": "review",
+    "reason": "i write well but i got low marks",
+    "currentMarks": 85,
+    "status": "completed",
+    "paymentStatus": "pending",
+    "createdAt": "2026-03-07T04:35:16.798Z",
+    "updatedAt": "2026-03-07T04:47:11.113Z"
+  },
+  {
+    "id": "69aba2783b37ada313d1eb41",
+    "studentId": "69aa720defac09f41bddc1bb",
+    "subjectId": "69aa767e78b6e529392f2ddb",
+    "subject": {
+      "_id": "69aa767e78b6e529392f2ddb",
+      "code": "22IT503",
+      "name": "INFORMATION CODING TECHNIQUES",
+      "semester": 5,
+      "credits": 3
+    },
+    "requestType": "review",
+    "reason": "i done my best but i got only low marks\n",
+    "currentMarks": 75,
+    "status": "completed",
+    "paymentStatus": "pending",
+    "responseSheet": "http://localhost:5000/uploads/1772855995618-Code_Catalysts.doc.pdf",
+    "createdAt": "2026-03-07T03:58:48.047Z",
+    "updatedAt": "2026-03-07T03:59:55.637Z"
+  },
+  {
+    "id": "69aba2483b37ada313d1eb35",
+    "studentId": "69aa720defac09f41bddc1bb",
+    "subjectId": "69aa767e78b6e529392f2dcf",
+    "subject": {
+      "_id": "69aa767e78b6e529392f2dcf",
+      "code": "22IT017",
+      "name": "SOFTWARE DEFINED NETWORKS",
+      "semester": 5,
+      "credits": 3
+    },
+    "requestType": "review",
+    "reason": "i did well but the marks disappointed me.",
+    "currentMarks": 85,
+    "status": "completed",
+    "paymentStatus": "pending",
+    "responseSheet": "http://localhost:5000/uploads/1772858022363-Untitled.pdf",
+    "createdAt": "2026-03-07T03:58:00.102Z",
+    "updatedAt": "2026-03-07T04:33:42.390Z"
+  }
+]

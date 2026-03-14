@@ -154,14 +154,12 @@ export default function AdminRequestsPage() {
       ),
     },
     {
-      key: "currentMarks",
-      header: "Marks",
+      key: "amountPaid",
+      header: "Payment",
       render: (request) => (
         <Box>
-          <Typography variant="body2" fontWeight={500}>{request.currentMarks}</Typography>
-          {request.updatedMarks !== undefined && (
-            <Typography variant="body2" color="success.main" fontWeight={600}>→ {request.updatedMarks}</Typography>
-          )}
+          <Typography variant="body2" fontWeight={700}>₹{request.amountPaid || '0'}</Typography>
+          <Typography variant="caption" color="text.secondary">{request.paymentMethod || 'N/A'}</Typography>
         </Box>
       ),
     },

@@ -49,6 +49,7 @@ export default function StudentRequestsPage() {
         });
 
         const data = await res.json();
+        console.log('Fetched requests raw data:', data);
 
         if (!res.ok) {
           throw new Error(data.message || 'Failed to fetch requests');
@@ -177,7 +178,7 @@ export default function StudentRequestsPage() {
                 title={
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                     <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
-                      {request.subject.code} - {request.subject.name}
+                      {request.subject?.code || 'Unknown Code'} - {request.subject?.name || 'Unknown Subject'}
                     </Typography>
                     <Chip
                       label={request.requestType}
@@ -223,7 +224,7 @@ export default function StudentRequestsPage() {
                           Current Marks
                         </Typography>
                         <Typography variant="h6" fontWeight={700} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
-                          {request.currentMarks}/100
+                          {request.currentMarks ?? 'N/A'}/100
                         </Typography>
                       </Box>
 
@@ -246,6 +247,15 @@ export default function StudentRequestsPage() {
                           </Typography>
                         </Box>
                       )}
+
+                      <Box>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.7rem' }}>
+                          Payment Info
+                        </Typography>
+                        <Typography variant="body2" fontWeight={700} color="success.main" sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }}>
+                          ₹{request.amountPaid || '0'} • {request.paymentStatus === 'success' ? 'Paid' : 'Pending'}
+                        </Typography>
+                      </Box>
                     </Box>
 
                     <Box sx={{ mb: 2.5 }}>

@@ -4,8 +4,10 @@ import Student from "../models/Student.js";
 import Subject from "../models/Subject.js";
 import Notification from "../models/Notification.js";
 import Admin from "../models/Admin.js";
+import Transaction from "../models/Transaction.js";
 
 // ✅ Get requests of a particular student
+// ... (rest of the file remains same until createRequest)
 export const getMyRequests = async (req, res) => {
   try {
     const { studentId } = req.params;
@@ -32,6 +34,8 @@ export const getMyRequests = async (req, res) => {
       reason: r.reason,
       currentMarks: r.currentMarks,
       status: r.status,
+      amountPaid: r.amountPaid,
+      paymentStatus: r.paymentStatus,
       updatedMarks: r.updatedMarks,
       adminRemarks: r.adminRemarks,
       responseSheet: r.responseSheet,
@@ -49,7 +53,7 @@ export const getMyRequests = async (req, res) => {
 // ✅ Create new request
 export const createRequest = async (req, res) => {
   try {
-    const { studentId, subjectId, requestType, reason, currentMarks, transactionId } = req.body; // Added transactionId
+    const { studentId, subjectId, requestType, reason, currentMarks, amountPaid, paymentStatus, studentEmail, transactionId } = req.body;
 
     if (!studentId || !subjectId || !requestType || !reason || !transactionId) { // Updated required fields check
       return res.status(400).json({ message: "studentId, subjectId, requestType, transactionId and reason are required" }); // Updated message
@@ -59,19 +63,8 @@ export const createRequest = async (req, res) => {
       return res.status(400).json({ message: "Invalid studentId or subjectId" });
     }
 
-    // Verify transaction securely from database
-    const transaction = await Transaction.findOne({ transactionId });
-    if (!transaction) {
-      return res.status(404).json({ message: "Transaction not found. Payment verification failed." });
-    }
-    if (transaction.paymentStatus !== "success") {
+    if (paymentStatus !== "success") {
       return res.status(400).json({ message: "Payment must be successful to submit a request" });
-    }
-    if (transaction.studentId.toString() !== studentId) {
-      return res.status(403).json({ message: "Transaction does not belong to this student" });
-    }
-    if (transaction.requestId) {
-      return res.status(400).json({ message: "This transaction has already been used for another request" });
     }
 
     // Students can only create requests for themselves
@@ -79,26 +72,44 @@ export const createRequest = async (req, res) => {
       return res.status(403).json({ message: "Not allowed to create request for another student" });
     }
 
+    // Prevent duplicate review/revaluation requests for the same subject
+    const existingRequest = await Request.findOne({ studentId, subjectId, requestType });
+    if (existingRequest) {
+      return res.status(400).json({ message: `You have already applied for ${requestType} for this subject.` });
+    }
+
     const newRequest = new Request({
       studentId,
       subjectId,
+      studentEmail,
       requestType,
       reason,
       currentMarks: currentMarks ?? null,
+      amountPaid,
+      paymentStatus: "success",
+      transactionId: transactionId || "N/A",
       status: "pending",
     });
 
     await newRequest.save();
 
+    // Link the transaction to this request if transactionId is provided
+    if (transactionId) {
+      await Transaction.findOneAndUpdate(
+        { transactionId: transactionId },
+        { requestId: newRequest._id }
+      );
+    }
+
     const populatedRequest = await Request.findById(newRequest._id)
       .populate("subjectId", "code name semester credits");
 
-    // Notify all admins (auth uses Admin model; JWT contains Admin._id)
+    // Notify all admins
     const admins = await Admin.find({});
     const notifications = admins.map((admin) => ({
       userId: admin._id,
       title: "New Request Submitted",
-      message: `A new ${requestType} request has been submitted for subject ${populatedRequest.subjectId?.name || "Unknown"}.`,
+      message: `A new ${requestType} request has been submitted by ${studentEmail} for subject ${populatedRequest.subjectId?.code || "Unknown"}.`,
       type: "info",
     }));
     if (notifications.length > 0) {
@@ -154,7 +165,7 @@ export const getAllRequests = async (req, res) => {
       id: r._id,
       studentId: r.studentId?._id || "N/A",
       studentName: r.studentId?.name || "Unknown Student",
-      studentEmail: r.studentId?.email || "N/A",
+      studentEmail: r.studentEmail || r.studentId?.email || "N/A",
       subjectId: r.subjectId?._id || "N/A",
       subject: r.subjectId || { code: "N/A", name: "Unknown Subject" },
       requestType: r.requestType,
@@ -163,6 +174,9 @@ export const getAllRequests = async (req, res) => {
       updatedMarks: r.updatedMarks,
       adminRemarks: r.adminRemarks,
       responseSheet: r.responseSheet,
+      amountPaid: r.amountPaid,
+      paymentMethod: r.paymentMethod,
+      paymentStatus: r.paymentStatus,
       status: r.status,
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
