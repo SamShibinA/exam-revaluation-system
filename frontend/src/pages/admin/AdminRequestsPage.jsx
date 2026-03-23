@@ -96,6 +96,12 @@ export default function AdminRequestsPage() {
 
   const handleUpdateRequest = async () => {
     if (!selectedRequest) return;
+
+    if (selectedRequest.requestType === "revaluation" && newStatus === "approved" && (updatedMarks === '' || updatedMarks === undefined)) {
+      enqueueSnackbar("Updated Marks is required for approving revaluation requests.", { variant: "error" });
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const res = await fetch(`${API_URL}/requests/${selectedRequest.id}/status`, {
@@ -303,7 +309,8 @@ export default function AdminRequestsPage() {
                 <TextField
                   fullWidth
                   type="number"
-                  label="Updated Marks (optional)"
+                  label={`Updated Marks${selectedRequest.requestType === "revaluation" && newStatus === "approved" ? " *" : " (optional)"}`}
+                  required={selectedRequest.requestType === "revaluation" && newStatus === "approved"}
                   value={updatedMarks}
                   onChange={(e) => setUpdatedMarks(e.target.value)}
                   inputProps={{ min: 0, max: 100 }}

@@ -5,6 +5,7 @@ import Subject from "../models/Subject.js";
 import Notification from "../models/Notification.js";
 import Admin from "../models/Admin.js";
 import Transaction from "../models/Transaction.js";
+import Mark from "../models/Mark.js";
 
 // ✅ Get requests of a particular student
 // ... (rest of the file remains same until createRequest)
@@ -203,6 +204,23 @@ export const updateRequestStatus = async (req, res) => {
     const request = await Request.findById(id);
     if (!request) {
       return res.status(404).json({ message: "Request not found" });
+    }
+
+    if (request.requestType === "revaluation" && status === "approved") {
+      if (updatedMarks === undefined || updatedMarks === null || String(updatedMarks).trim() === "") {
+        return res.status(400).json({ message: "Updated marks are required for approving revaluation requests" });
+      }
+
+      const markDoc = await Mark.findOne({ studentId: request.studentId, subjectId: request.subjectId });
+      if (markDoc) {
+        markDoc.totalMarks = Number(updatedMarks);
+        if (markDoc.internalMarks !== undefined && markDoc.internalMarks !== null) {
+          markDoc.externalMarks = Number(updatedMarks) - markDoc.internalMarks;
+        } else {
+          markDoc.externalMarks = Number(updatedMarks);
+        }
+        await markDoc.save();
+      }
     }
 
     request.status = status || request.status;
