@@ -56,8 +56,16 @@ export default function AdminRequestsPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        if (res.status === 401) {
-          enqueueSnackbar("Session expired. Please login again.", { variant: "error" });
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem("auth_token"); // Automatically clear old tokens
+          enqueueSnackbar(
+            res.status === 403 
+              ? "Admin access required. Your session token is outdated. Please login again." 
+              : "Session expired. Please login again.", 
+            { variant: "error" }
+          );
+          // Optional: redirect to login
+          window.location.href = "/login";
           return;
         }
         throw new Error(data.message || "Failed to fetch requests");

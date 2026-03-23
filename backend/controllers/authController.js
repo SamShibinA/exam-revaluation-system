@@ -37,7 +37,7 @@ export const loginUser = async (req, res) => {
     }
 
     // Generate Token
-    const token = generateToken(user._id);
+    const token = generateToken(user._id, role);
 
     res.json({
       user: {
@@ -92,7 +92,7 @@ export const googleLogin = async (req, res) => {
       return res.status(403).json({ message: "Access denied. Your email is not registered in the system." });
     }
 
-    const token = generateToken(user._id);
+    const token = generateToken(user._id, role);
 
     res.json({
       user: {
