@@ -81,8 +81,12 @@ export default function UploadDocumentPage() {
         });
         const data = await res.json();
         if (data && Array.isArray(data.data)) {
-          // Show only review requests (not revaluation) for response sheet upload
-          const reviewOnly = data.data.filter((r) => (r.requestType || "").toLowerCase() === "review");
+          // Show only review requests that are not completed and don't have a response sheet
+          const reviewOnly = data.data.filter((r) => 
+            (r.requestType || "").toLowerCase() === "review" &&
+            r.status !== "completed" &&
+            !r.responseSheet
+          );
           setRequests(reviewOnly);
         }
       } catch (error) {
