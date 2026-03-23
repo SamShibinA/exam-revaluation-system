@@ -5,7 +5,6 @@ const statusConfig = {
   in_review: { label: 'In Review', color: 'info', dotColor: '#0ea5e9' },
   approved: { label: 'Approved', color: 'success', dotColor: '#22c55e' },
   rejected: { label: 'Rejected', color: 'error', dotColor: '#ef4444' },
-  completed: { label: 'Completed', color: 'success', dotColor: '#16a34a' },
 };
 
 export function StatusBadge({ status }) {

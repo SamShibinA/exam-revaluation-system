@@ -140,7 +140,7 @@ export default function AdminDashboard() {
           <StatsCard title="Total Students" value={stats?.totalStudents || 0} description="Registered students" icon={UsersIcon} variant="primary" />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
-          <StatsCard title="Total Requests" value={stats?.totalRequests || 0} description={`${stats?.completedToday || 0} completed today`} icon={ClipboardIcon} variant="accent" />
+          <StatsCard title="Total Requests" value={stats?.totalRequests || 0} description={`${stats?.approvedToday || 0} processed today`} icon={ClipboardIcon} variant="accent" />
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
           <StatsCard title="Pending Review" value={stats?.pendingRequests || 0} description="Awaiting action" icon={ClockIcon} variant="warning" />

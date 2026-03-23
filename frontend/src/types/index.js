@@ -1,5 +1,5 @@
 /** @typedef {'student' | 'admin'} UserRole */
-/** @typedef {'pending' | 'in_review' | 'approved' | 'rejected' | 'completed'} RequestStatus */
+/** @typedef {'pending' | 'in_review' | 'approved' | 'rejected'} RequestStatus */
 /** @typedef {'review' | 'revaluation'} RequestType */
 
 /**

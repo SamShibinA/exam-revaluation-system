@@ -11,7 +11,6 @@ const timelineSteps = [
   { status: 'pending', label: 'Submitted', icon: ClockIcon },
   { status: 'in_review', label: 'In Review', icon: FileSearchIcon },
   { status: 'approved', label: 'Decision', icon: CheckIcon },
-  { status: 'completed', label: 'Completed', icon: CheckCircleIcon },
 ];
 
 const getStepIndex = (status) => {

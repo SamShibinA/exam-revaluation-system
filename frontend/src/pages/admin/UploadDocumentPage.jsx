@@ -81,10 +81,9 @@ export default function UploadDocumentPage() {
         });
         const data = await res.json();
         if (data && Array.isArray(data.data)) {
-          // Show only review requests that are not completed and don't have a response sheet
+          // Show only review requests that don't have a response sheet
           const reviewOnly = data.data.filter((r) => 
             (r.requestType || "").toLowerCase() === "review" &&
-            r.status !== "completed" &&
             !r.responseSheet
           );
           setRequests(reviewOnly);

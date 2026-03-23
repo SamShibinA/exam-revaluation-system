@@ -242,7 +242,7 @@ export const updateRequestStatus = async (req, res) => {
         userId: studentUserId,
         title: "Request Status Updated",
         message: `Your request for ${updatedRequest.subjectId?.name || "subject"} has been updated to: ${newStatus}.${adminRemarks ? ` Remarks: ${adminRemarks}` : ""}`,
-        type: newStatus === "approved" || newStatus === "completed" ? "success" : newStatus === "rejected" ? "error" : "info",
+        type: newStatus === "approved" ? "success" : newStatus === "rejected" ? "error" : "info",
       });
     }
 

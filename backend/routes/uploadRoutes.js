@@ -46,10 +46,10 @@ router.post(
 
       await newUpload.save();
 
-      // Update request status to 'completed' when any document is uploaded
+      // Update request status to 'approved' when any document is uploaded
       const request = await Request.findById(requestId).populate("studentId", "email");
       if (request) {
-        request.status = "completed";
+        request.status = "approved";
         request.updatedAt = new Date();
         if (documentType === "response_sheet") {
           request.responseSheet = newUpload.fileUrl;

@@ -302,10 +302,9 @@ export default function AdminRequestsPage() {
                 <MenuItem value="in_review">In Review</MenuItem>
                 <MenuItem value="approved">Approved</MenuItem>
                 <MenuItem value="rejected">Rejected</MenuItem>
-                <MenuItem value="completed">Completed</MenuItem>
               </TextField>
 
-              {(newStatus === "approved" || newStatus === "completed") && (
+              {(newStatus === "approved") && (
                 <TextField
                   fullWidth
                   type="number"

@@ -14,11 +14,11 @@ export const getDashboardStats = async (req, res) => {
     const rejectedRequests = await Request.countDocuments({ status: "rejected" });
     const inReviewRequests = await Request.countDocuments({ status: "in_review" });
 
-    // Calculate completed today
+    // Calculate approved today
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
-    const completedToday = await Request.countDocuments({
-      status: { $in: ["approved", "rejected", "completed"] },
+    const approvedToday = await Request.countDocuments({
+      status: { $in: ["approved", "rejected"] },
       updatedAt: { $gte: startOfDay },
     });
 
@@ -29,7 +29,7 @@ export const getDashboardStats = async (req, res) => {
       approvedRequests,
       rejectedRequests,
       inReviewRequests,
-      completedToday,
+      approvedToday,
       avgProcessingTime: "2.5 days", // Placeholder for now
     });
   } catch (error) {
