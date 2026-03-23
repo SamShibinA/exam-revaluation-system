@@ -249,11 +249,11 @@ export default function StudentDashboard() {
                         },
                       }}
                     >
-                      <Box>
-                        <Typography variant="body2" fontWeight={600}>
+                      <Box sx={{ flex: 1, minWidth: 0, pr: 2 }}>
+                        <Typography variant="body2" fontWeight={600} noWrap>
                           {request.subject.code} - {request.subject.name}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" color="text.secondary" noWrap sx={{ display: 'block' }}>
                           {format(new Date(request.createdAt), 'MMM dd, yyyy')}
                         </Typography>
                       </Box>
@@ -300,11 +300,11 @@ export default function StudentDashboard() {
                         item.icon === CheckCircleIcon ? <CheckCircleIcon sx={{ fontSize: { xs: 20, sm: 28 } }} /> :
                           <CancelIcon sx={{ fontSize: { xs: 20, sm: 28 } }} />}
                   </Box>
-                  <Box>
-                    <Typography variant="h5" fontWeight={800} sx={{ fontSize: { xs: '1rem', sm: '1.5rem' }, lineHeight: 1.2 }}>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography variant="h5" fontWeight={800} noWrap sx={{ fontSize: { xs: '1rem', sm: '1.5rem' }, lineHeight: 1.2 }}>
                       {item.value}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" fontWeight={500} sx={{ fontSize: { xs: '0.65rem', sm: '0.75rem' } }}>
+                    <Typography variant="caption" color="text.secondary" fontWeight={500} noWrap sx={{ fontSize: { xs: '0.65rem', sm: '0.75rem' }, display: 'block' }}>
                       {item.label}
                     </Typography>
                   </Box>

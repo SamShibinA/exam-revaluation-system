@@ -160,6 +160,9 @@ export default function ViewMarksPage() {
             <Card
               className={`animate-fade-in-up animate-stagger-${i + 1}`}
               sx={{
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
                 background: card.gradient,
                 border: 'none',
                 '&:hover': {
@@ -167,7 +170,7 @@ export default function ViewMarksPage() {
                 },
               }}
             >
-              <CardContent sx={{ textAlign: 'center', py: { xs: 2, sm: 3 }, px: 1 }}>
+              <CardContent sx={{ textAlign: 'center', py: { xs: 2, sm: 3 }, px: 1, width: '100%' }}>
                 <Typography variant="body2" sx={{ color: card.color, fontWeight: 600, opacity: 0.8, fontSize: { xs: '0.75rem', sm: '0.85rem' } }}>
                   {card.label}
                 </Typography>

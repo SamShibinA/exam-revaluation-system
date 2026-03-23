@@ -42,9 +42,12 @@ export function StatsCard({
     <Card
       className="animate-fade-in-up"
       sx={{
+        width: '100%',
         position: 'relative',
         overflow: 'visible',
         cursor: 'default',
+        display: 'flex',
+        flexDirection: 'column',
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: '0 12px 32px -8px rgba(15, 118, 110, 0.15)',
@@ -64,12 +67,13 @@ export function StatsCard({
         }}
       />
 
-      <CardContent sx={{ p: 2.5 }}>
+      <CardContent sx={{ p: 2.5, width: '100%' }}>
         <Box
           sx={{
             display: 'flex',
-            alignItems: 'flex-start',
+            alignItems: 'center',
             justifyContent: 'space-between',
+            width: '100%',
           }}
         >
           <Box>
