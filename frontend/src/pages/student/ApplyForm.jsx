@@ -384,45 +384,48 @@ export default function ApplyForm({ type }) {
               )}
             />
 
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column-reverse', sm: 'row' }, gap: 2 }}>
               <Button
                 variant="outlined"
                 onClick={() => navigate(-1)}
                 disabled={isSubmitting}
-                sx={{ px: 3 }}
+                sx={{ px: 3, width: { xs: '100%', sm: 'auto' } }}
               >
                 Cancel
               </Button>
-              {!paymentData ? (
-                <GooglePayButton 
-                  onClick={handleSubmit(onSubmit)} 
-                  disabled={isSubmitting || !watchedSubjectId || reasonValue.length < 20}
-                  amount={amount}
-                />
-              ) : (
-                <Button
-                  type="submit"
-                  variant="contained"
-                  disabled={isSubmitting}
-                  startIcon={
-                    isSubmitting ? (
-                      <CircularProgress size={20} />
-                    ) : (
-                      <CheckIcon />
-                    )
-                  }
-                  sx={{
-                    px: 3,
-                    flex: 1,
-                    background: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #0d5c56 0%, #0f766e 100%)',
-                    },
-                  }}
-                >
-                  {isSubmitting ? 'Submitting...' : 'Submit Request'}
-                </Button>
-              )}
+              <Box sx={{ width: { xs: '100%', sm: 'auto' }, flex: { sm: 1 }, display: 'flex' }}>
+                {!paymentData ? (
+                  <GooglePayButton 
+                    onClick={handleSubmit(onSubmit)} 
+                    disabled={isSubmitting || !watchedSubjectId || reasonValue.length < 20}
+                    amount={amount}
+                  />
+                ) : (
+                  <Button
+                    type="submit"
+                    variant="contained"
+                    disabled={isSubmitting}
+                    startIcon={
+                      isSubmitting ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        <CheckIcon />
+                      )
+                    }
+                    sx={{
+                      px: 3,
+                      flex: 1,
+                      width: '100%',
+                      background: 'linear-gradient(135deg, #0f766e 0%, #14b8a6 100%)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #0d5c56 0%, #0f766e 100%)',
+                      },
+                    }}
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                  </Button>
+                )}
+              </Box>
             </Box>
           </form>
         </CardContent>
