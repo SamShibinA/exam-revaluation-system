@@ -65,7 +65,45 @@ export const getStudentStats = async (req, res) => {
 
     const dbId = targetStudent._id;
 
-    const totalSubjects = await Mark.countDocuments({ studentId: dbId });
+    const currentSemester = targetStudent.currentSemester ?? 1;
+
+    const marks = await Mark.find({ studentId: dbId }).populate("subjectId", "credits semester");
+
+    const getGradePoints = (grade) => {
+      switch (grade?.trim().toUpperCase()) {
+        case "O": return 10;
+        case "A+": return 9;
+        case "A": return 8;
+        case "B+": return 7;
+        case "B": return 6;
+        case "C": return 5;
+        default: return 0;
+      }
+    };
+
+    let totalCredits = 0;
+    let totalPoints = 0;
+    
+    let sgpaCredits = 0;
+    let sgpaPoints = 0;
+
+    marks.forEach(mark => {
+      const credits = mark.subjectId?.credits || 0;
+      const points = getGradePoints(mark.grade);
+      
+      totalCredits += credits;
+      totalPoints += (credits * points);
+
+      if (mark.subjectId?.semester === currentSemester) {
+        sgpaCredits += credits;
+        sgpaPoints += (credits * points);
+      }
+    });
+
+    const cgpa = totalCredits > 0 ? (totalPoints / totalCredits) : 0;
+    const sgpa = sgpaCredits > 0 ? (sgpaPoints / sgpaCredits) : 0;
+
+    const totalSubjects = marks.length;
     const pending = await Request.countDocuments({ studentId: dbId, status: "pending" });
     const approved = await Request.countDocuments({ studentId: dbId, status: "approved" });
     const rejected = await Request.countDocuments({ studentId: dbId, status: "rejected" });
@@ -73,8 +111,9 @@ export const getStudentStats = async (req, res) => {
 
     res.json({
       totalSubjects,
-      currentSemester: targetStudent.currentSemester ?? 0,
-      cgpa: targetStudent.cgpa ?? 0,
+      currentSemester,
+      cgpa,
+      sgpa,
       totalRequests: pending + approved + rejected + inReview,
       pendingRequests: pending,
       approvedRequests: approved,

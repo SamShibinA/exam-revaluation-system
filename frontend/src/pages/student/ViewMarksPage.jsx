@@ -20,6 +20,8 @@ import {
   Paper,
   Grid,
   Alert,
+  TextField,
+  MenuItem,
 } from '@mui/material';
 
 const getGradeColor = (grade) => {
@@ -42,6 +44,7 @@ const getGradeColor = (grade) => {
 export default function ViewMarksPage() {
   const { user } = useAuth();
   const [marks, setMarks] = useState([]);
+  const [selectedSemester, setSelectedSemester] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -90,33 +93,58 @@ export default function ViewMarksPage() {
   }
 
   const subjectRef = (m) => m.subjectId && typeof m.subjectId === 'object' ? m.subjectId : {};
-  const totalCredits = marks.reduce((sum, m) => sum + (subjectRef(m).credits || 0), 0);
-  const weightedSum = marks.reduce(
+  
+  const semesters = ['All', ...new Set(marks.map(m => subjectRef(m).semester).filter(Boolean))].sort();
+
+  const displayedMarks = selectedSemester === 'All' 
+    ? marks 
+    : marks.filter(m => subjectRef(m).semester === selectedSemester);
+
+  const totalCredits = displayedMarks.reduce((sum, m) => sum + (subjectRef(m).credits || 0), 0);
+  const weightedSum = displayedMarks.reduce(
     (sum, m) => sum + (m.totalMarks || 0) * (subjectRef(m).credits || 0),
     0
   );
-  const sgpa =
+  const gpa =
     totalCredits > 0 ? (weightedSum / totalCredits / 10).toFixed(2) : '0.00';
 
   const summaryCards = [
-    { label: 'Total Subjects', value: marks.length, gradient: 'linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%)', color: '#0f766e' },
+    { label: 'Total Subjects', value: displayedMarks.length, gradient: 'linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%)', color: '#0f766e' },
     { label: 'Total Credits', value: totalCredits, gradient: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)', color: '#2563eb' },
-    { label: 'SGPA', value: sgpa, gradient: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)', color: '#16a34a' },
+    { label: selectedSemester === 'All' ? 'CGPA' : 'SGPA', value: gpa, gradient: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)', color: '#16a34a' },
   ];
 
   return (
     <Box sx={{ width: '100%', overflow: 'hidden', px: { xs: 1, sm: 0 } }}>
-      <Box sx={{ mb: { xs: 2, sm: 3 } }} className="animate-fade-in-up">
-        <Typography
-          variant="h5"
-          fontWeight={800}
-          sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' }, letterSpacing: '-0.02em' }}
-        >
-          View Marks 📊
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Your academic performance for the current semester
-        </Typography>
+      <Box sx={{ mb: { xs: 2, sm: 3 }, display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2 }} className="animate-fade-in-up">
+        <Box>
+          <Typography
+            variant="h5"
+            fontWeight={800}
+            sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' }, letterSpacing: '-0.02em' }}
+          >
+            View Marks 📊
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Your academic performance grouped by semester
+          </Typography>
+        </Box>
+        <Box>
+          <TextField
+            select
+            size="small"
+            label="Filter Semester"
+            value={selectedSemester}
+            onChange={(e) => setSelectedSemester(e.target.value)}
+            sx={{ minWidth: 150 }}
+          >
+            {semesters.map((sem) => (
+               <MenuItem key={sem} value={sem}>
+                 {sem === 'All' ? 'All Semesters' : `Semester ${sem}`}
+               </MenuItem>
+            ))}
+          </TextField>
+        </Box>
       </Box>
 
       {error && (
@@ -155,7 +183,7 @@ export default function ViewMarksPage() {
       {/* Marks Table */}
       <Card sx={{ mb: 3 }} className="animate-fade-in-up animate-stagger-4">
         <CardHeader
-          title="Semester 3 - 2024-25"
+          title={selectedSemester === 'All' ? "All Semesters" : `Semester ${selectedSemester}`}
           titleTypographyProps={{ variant: 'h6' }}
         />
         <CardContent>
@@ -182,7 +210,7 @@ export default function ViewMarksPage() {
               </TableHead>
 
               <TableBody>
-                {marks.map((mark, idx) => {
+                {displayedMarks.map((mark, idx) => {
                   const subj = subjectRef(mark);
                   return (
                     <TableRow

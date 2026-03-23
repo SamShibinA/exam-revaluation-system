@@ -135,6 +135,15 @@ export default function StudentDashboard() {
         </Grid>
         <Grid item xs={12} sm={6} lg={3}>
           <StatsCard
+            title="SGPA"
+            value={stats?.sgpa ? stats.sgpa.toFixed(2) : '0.00'}
+            description={`Semester ${stats?.currentSemester || 0} GPA`}
+            icon={TrendingUpIcon}
+            variant="warning"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} lg={3}>
+          <StatsCard
             title="CGPA"
             value={stats?.cgpa ? stats.cgpa.toFixed(2) : '0.00'}
             description="Cumulative GPA"
@@ -142,15 +151,7 @@ export default function StudentDashboard() {
             variant="success"
           />
         </Grid>
-        <Grid item xs={12} sm={6} lg={3}>
-          <StatsCard
-            title="Pending Requests"
-            value={stats?.pendingRequests || 0}
-            description={`${stats?.totalRequests || 0} total requests`}
-            icon={ClockIcon}
-            variant="warning"
-          />
-        </Grid>
+
       </Grid>
 
       {/* Quick Actions & Recent Requests */}
