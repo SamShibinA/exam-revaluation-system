@@ -65,9 +65,18 @@ export const getStudentStats = async (req, res) => {
 
     const dbId = targetStudent._id;
 
-    const currentSemester = targetStudent.currentSemester ?? 1;
-
     const marks = await Mark.find({ studentId: dbId }).populate("subjectId", "credits semester");
+
+    let maxSemester = 0;
+    marks.forEach(mark => {
+      const sem = mark.subjectId?.semester || 0;
+      if (sem > maxSemester) {
+        maxSemester = sem;
+      }
+    });
+
+    const currentSemester = maxSemester > 0 ? maxSemester + 1 : (targetStudent.currentSemester ?? 1);
+    const sgpaSemester = maxSemester > 0 ? maxSemester : currentSemester;
 
     const getGradePoints = (grade) => {
       switch (grade?.trim().toUpperCase()) {
@@ -94,7 +103,7 @@ export const getStudentStats = async (req, res) => {
       totalCredits += credits;
       totalPoints += (credits * points);
 
-      if (mark.subjectId?.semester === currentSemester) {
+      if (mark.subjectId?.semester === sgpaSemester) {
         sgpaCredits += credits;
         sgpaPoints += (credits * points);
       }
@@ -112,6 +121,7 @@ export const getStudentStats = async (req, res) => {
     res.json({
       totalSubjects,
       currentSemester,
+      sgpaSemester,
       cgpa,
       sgpa,
       totalRequests: pending + approved + rejected + inReview,

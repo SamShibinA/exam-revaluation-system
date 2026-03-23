@@ -137,7 +137,7 @@ export default function StudentDashboard() {
           <StatsCard
             title="SGPA"
             value={stats?.sgpa ? stats.sgpa.toFixed(2) : '0.00'}
-            description={`Semester ${stats?.currentSemester || 0} GPA`}
+            description={`Semester ${stats?.sgpaSemester || stats?.currentSemester || 0} GPA`}
             icon={TrendingUpIcon}
             variant="warning"
           />
